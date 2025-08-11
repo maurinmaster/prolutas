@@ -30,7 +30,8 @@ SECRET_KEY = 'django-insecure-9n@p_$d8qd@y(lys@u5el%b%aah7fzv=k9=9n_e1sa*b_+jvme
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CSRF_TRUSTED_ORIGINS = ['https://gestor.prolutas.com', 'http://gestor.prolutas.com']
 
 # Application definition
 
