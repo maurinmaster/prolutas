@@ -1,0 +1,320 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Log de Mensagens - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos para relatório de mensagens - Tema Dark */
+    .report-header {
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 8px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-soft);
+    }
+    
+    .report-title {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .report-icon {
+        color: var(--accent-purple);
+        margin-right: 0.75rem;
+    }
+    
+    .search-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 8px;
+        box-shadow: var(--shadow-soft);
+        margin-bottom: 1.5rem;
+    }
+    
+    .search-btn {
+        background: var(--accent-blue) !important;
+        border-color: var(--accent-blue) !important;
+        color: var(--bg-primary) !important;
+        border-radius: 6px !important;
+        font-weight: 500 !important;
+        padding: 0.7rem 1.5rem !important;
+    }
+    
+    .search-btn:hover {
+        background: rgba(86, 156, 214, 0.8) !important;
+        border-color: rgba(86, 156, 214, 0.8) !important;
+        transform: translateY(-1px);
+    }
+    
+    .messages-table {
+        background: var(--bg-card);
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: var(--shadow-soft);
+    }
+    
+    .messages-table th {
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+        font-weight: 500;
+        font-size: 0.9rem;
+        padding: 1rem 0.75rem;
+        border: none;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .messages-table tbody tr {
+        border-bottom: 1px solid var(--border-dark);
+        transition: all 0.2s ease;
+    }
+    
+    .messages-table tbody tr:hover {
+        background: var(--bg-hover);
+    }
+    
+    .messages-table tbody tr:last-child {
+        border-bottom: none;
+    }
+    
+    .messages-table td {
+        padding: 1rem 0.75rem;
+        color: var(--text-primary);
+        border: none;
+        vertical-align: middle;
+    }
+    
+    .status-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        border: 1px solid;
+    }
+    
+    .status-success {
+        background: rgba(78, 201, 176, 0.15);
+        color: var(--accent-green);
+        border-color: rgba(78, 201, 176, 0.3);
+    }
+    
+    .status-error {
+        background: rgba(244, 135, 113, 0.15);
+        color: var(--accent-red);
+        border-color: rgba(244, 135, 113, 0.3);
+    }
+    
+    .type-badge {
+        background: var(--bg-hover);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-light);
+        padding: 0.3rem 0.6rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .message-content {
+        background: var(--bg-hover);
+        border: 1px solid var(--border-light);
+        border-radius: 4px;
+        padding: 0.5rem;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        color: var(--text-secondary);
+        max-width: 300px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    
+    .pagination .page-link {
+        background-color: var(--bg-card) !important;
+        border: 1px solid var(--border-light) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    .pagination .page-link:hover {
+        background-color: var(--bg-hover) !important;
+        border-color: var(--accent-blue) !important;
+        color: var(--accent-blue) !important;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: var(--accent-blue) !important;
+        border-color: var(--accent-blue) !important;
+        color: var(--bg-primary) !important;
+    }
+    
+    .empty-state {
+        background: var(--bg-hover);
+        color: var(--text-muted);
+        text-align: center;
+        padding: 3rem 2rem;
+        border-radius: 8px;
+        border: 1px solid var(--border-light);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="report-header">
+    <h2 class="report-title">
+        <i class="bi bi-chat-left-text-fill report-icon"></i>
+        Relatório de Mensagens Enviadas
+    </h2>
+    <p style="color: var(--text-secondary); margin-bottom: 0;">
+        <i class="bi bi-info-circle me-1"></i>
+        Log completo das notificações enviadas via WhatsApp
+    </p>
+</div>
+
+<div class="search-card">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label for="id_q" class="form-label" style="color: var(--text-secondary); font-weight: 500;">
+                    <i class="bi bi-search me-1" style="color: var(--accent-blue);"></i>
+                    Buscar por Aluno ou Mensagem
+                </label>
+                <input type="text" name="q" class="form-control" id="id_q" value="{{ filtros_aplicados.q }}">
+            </div>
+            <div class="col-md-3">
+                <label for="id_data_inicio" class="form-label" style="color: var(--text-secondary); font-weight: 500;">
+                    <i class="bi bi-calendar-event me-1" style="color: var(--accent-blue);"></i>
+                    De:
+                </label>
+                <input type="date" name="data_inicio" class="form-control" id="id_data_inicio" value="{{ filtros_aplicados.data_inicio }}">
+            </div>
+            <div class="col-md-3">
+                <label for="id_data_fim" class="form-label" style="color: var(--text-secondary); font-weight: 500;">
+                    <i class="bi bi-calendar-check me-1" style="color: var(--accent-blue);"></i>
+                    Até:
+                </label>
+                <input type="date" name="data_fim" class="form-control" id="id_data_fim" value="{{ filtros_aplicados.data_fim }}">
+            </div>
+            <div class="col-md-1 d-grid">
+                <button type="submit" class="btn search-btn">
+                    <i class="bi bi-search me-1"></i>
+                    Filtrar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="messages-table">
+    <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Data/Hora</th>
+                    <th>Aluno</th>
+                    <th>Tipo</th>
+                    <th>Status</th>
+                    <th style="width: 40%;">Mensagem</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in page_obj %}
+                <tr>
+                    <td>
+                        <div style="color: var(--text-primary); font-weight: 500; font-size: 0.9rem;">
+                            {{ log.data_envio|date:"d/m/Y" }}
+                        </div>
+                        <small style="color: var(--text-muted);">
+                            {{ log.data_envio|date:"H:i" }}
+                        </small>
+                    </td>
+                    <td>
+                        <div style="color: var(--text-primary); font-weight: 500;">
+                            {{ log.aluno.nome_completo|default:"-" }}
+                        </div>
+                        {% if log.aluno %}
+                            <small style="color: var(--text-muted);">
+                                <i class="bi bi-person-badge me-1"></i>
+                                Aluno
+                            </small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="type-badge">{{ log.get_tipo_display }}</span>
+                    </td>
+                    <td>
+                        {% if log.sucesso %}
+                            <span class="status-badge status-success">
+                                <i class="bi bi-check-circle me-1"></i>
+                                Enviado
+                            </span>
+                        {% else %}
+                            <span class="status-badge status-error" title="{{ log.resposta_gateway }}">
+                                <i class="bi bi-x-circle me-1"></i>
+                                Falhou
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="message-content">{{ log.mensagem }}</div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="p-0">
+                        <div class="empty-state">
+                            <i class="bi bi-chat-x" style="font-size: 3rem; margin-bottom: 1rem; color: var(--text-muted);"></i>
+                            <h5 style="color: var(--text-secondary);">Nenhuma Mensagem Encontrada</h5>
+                            <p style="color: var(--text-muted);">
+                                Nenhuma mensagem encontrada para os filtros selecionados.
+                                <br>
+                                <small>Tente ajustar os critérios de busca.</small>
+                            </p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <div class="card-body border-top" style="border-color: var(--border-light) !important;">
+        <nav aria-label="Navegação das mensagens">
+            <ul class="pagination justify-content-center mb-0">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1&q={{ filtros_aplicados.q }}&data_inicio={{ filtros_aplicados.data_inicio }}&data_fim={{ filtros_aplicados.data_fim }}">
+                            <i class="bi bi-chevron-double-left me-1"></i> Primeira
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ filtros_aplicados.q }}&data_inicio={{ filtros_aplicados.data_inicio }}&data_fim={{ filtros_aplicados.data_fim }}">
+                            <i class="bi bi-chevron-left me-1"></i> Anterior
+                        </a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">
+                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+                
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ filtros_aplicados.q }}&data_inicio={{ filtros_aplicados.data_inicio }}&data_fim={{ filtros_aplicados.data_fim }}">
+                            Próxima <i class="bi bi-chevron-right ms-1"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&q={{ filtros_aplicados.q }}&data_inicio={{ filtros_aplicados.data_inicio }}&data_fim={{ filtros_aplicados.data_fim }}">
+                            Última <i class="bi bi-chevron-double-right ms-1"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

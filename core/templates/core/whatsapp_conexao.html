@@ -1,0 +1,129 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Conectar WhatsApp - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm text-center">
+            <div class="card-header">
+                <h4><i class="bi bi-whatsapp"></i> Conexão com o WhatsApp</h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Gerencie a conexão do seu número de WhatsApp para o envio de notificações automáticas.</p>
+                <hr>
+
+                <div id="status-area" class="mb-3">
+                    <h5 id="status-text">Verificando status...</h5>
+                    <div id="status-spinner" class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+
+                <div id="qrcode-area" style="display: none;">
+                    <p><strong>Escaneie o código abaixo com o seu celular:</strong></p>
+                    <img id="qrcode-img" src="" alt="QR Code do WhatsApp" class="img-fluid border rounded">
+                </div>
+                
+                <button id="connect-btn" class="btn btn-primary" style="display: none;">
+                    Conectar / Gerar Novo QR Code
+                </button>
+            </div>
+            <div class="card-footer text-muted">
+                A conexão pode levar alguns instantes para ser estabelecida.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        const academiaId = "{{ academia_id }}";
+        const statusText = $('#status-text');
+        const statusSpinner = $('#status-spinner');
+        const qrcodeArea = $('#qrcode-area');
+        const qrcodeImg = $('#qrcode-img');
+        const connectBtn = $('#connect-btn');
+        
+        let statusInterval;
+        const gatewayUrl = 'http://localhost:3000';
+    
+        function stopPolling() {
+            if (statusInterval) {
+                clearInterval(statusInterval);
+                statusInterval = null;
+            }
+        }
+    
+        function checkStatus() {
+            $.get(`${gatewayUrl}/status/${academiaId}`, function(data) {
+                statusSpinner.hide();
+                
+                if (data.status === 'ready') {
+                    statusText.html('Conectado <i class="bi bi-check-circle-fill text-success"></i>');
+                    qrcodeArea.hide();
+                    connectBtn.hide();
+                    stopPolling();
+                } else if (data.status === 'qr_ready') {
+                    statusText.text('Aguardando escaneamento do QR Code...');
+                    qrcodeImg.attr('src', data.qrCode);
+                    qrcodeArea.show();
+                    connectBtn.hide();
+                } else if (data.status === 'initializing') {
+                    statusText.text('Gerando QR Code, por favor aguarde...');
+                    statusSpinner.show();
+                    qrcodeArea.hide();
+                    connectBtn.hide();
+                } else { // disconnected ou qualquer outro estado
+                    statusText.text('Desconectado');
+                    qrcodeArea.hide();
+                    connectBtn.show();
+                    stopPolling();
+                }
+            }).fail(function() {
+                statusText.html('Gateway offline <i class="bi bi-exclamation-triangle-fill text-danger"></i>');
+                statusSpinner.hide();
+                connectBtn.hide();
+                stopPolling();
+            });
+        }
+    
+        function startPolling() {
+            // Limpa qualquer loop anterior para evitar múltiplos loops
+            stopPolling();
+            // Verifica o status imediatamente
+            checkStatus();
+            // Começa o loop de verificação
+            statusInterval = setInterval(checkStatus, 4000);
+        }
+    
+        connectBtn.on('click', function() {
+            statusSpinner.show();
+            connectBtn.hide();
+            statusText.text('Iniciando conexão...');
+    
+            $.ajax({
+                url: `${gatewayUrl}/initialize`,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ academiaId: academiaId.toString() }),
+                success: function(data) {
+                    console.log(data.message);
+                    // Começa a verificar o status em loop após o sucesso
+                    startPolling();
+                },
+                error: function() {
+                    statusText.text('Erro ao contatar o gateway.');
+                    statusSpinner.hide();
+                    connectBtn.show();
+                }
+            });
+        });
+    
+        // --- Primeira verificação ao carregar a página ---
+        checkStatus();
+    });
+    </script>
+    {% endblock %}

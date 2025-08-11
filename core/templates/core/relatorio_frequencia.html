@@ -1,0 +1,80 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Relatório de Frequência - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-graph-up"></i> Relatório de Frequência de Alunos</h2>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h5><i class="bi bi-filter"></i> Filtros</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label for="id_data_inicio" class="form-label">Data de Início</label>
+                <input type="date" name="data_inicio" class="form-control" id="id_data_inicio" value="{{ filtros_aplicados.data_inicio }}">
+            </div>
+            <div class="col-md-4">
+                <label for="id_data_fim" class="form-label">Data de Fim</label>
+                <input type="date" name="data_fim" class="form-control" id="id_data_fim" value="{{ filtros_aplicados.data_fim }}">
+            </div>
+            <div class="col-md-3">
+                <label for="id_turma" class="form-label">Turma</label>
+                <select name="turma" class="form-select" id="id_turma">
+                    <option value="">Todas as Turmas</option>
+                    {% for turma in turmas_para_filtro %}
+                        <option value="{{ turma.pk }}" {% if filtros_aplicados.turma_id == turma.pk|stringformat:"s" %}selected{% endif %}>
+                            {{ turma }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1 d-grid">
+                <button type="submit" class="btn btn-primary">Filtrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h5>Resultados</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Posição</th>
+                        <th>Aluno</th>
+                        <th>Nº de Presenças no Período</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for aluno in resultados %}
+                    <tr>
+                        <td>{{ forloop.counter }}º</td>
+                        <td>
+                            {% if aluno.foto %}
+                                <img src="{{ aluno.foto.url }}" class="rounded-circle me-2" style="width: 35px; height: 35px; object-fit: cover;">
+                            {% endif %}
+                            {{ aluno.nome_completo }}
+                        </td>
+                        <td>
+                            <strong class="fs-5">{{ aluno.num_presencas }}</strong>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center">Nenhum resultado encontrado para os filtros selecionados.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

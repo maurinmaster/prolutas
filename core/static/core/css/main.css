@@ -1,0 +1,2131 @@
+/* =====================================================
+   CSS PRINCIPAL - SISTEMA PRO-LUTAS
+   ===================================================== */
+
+/* Import das variáveis */
+@import url('./variables.css');
+
+/* =====================================================
+   PREVENÇÃO DE FLASH E TRANSIÇÕES
+   ===================================================== */
+
+/* Desabilita transições durante mudança de tema para evitar "congelamento" */
+body.theme-transitioning * {
+    transition: none !important;
+    animation: none !important;
+}
+
+/* Estilos críticos para prevenir flash */
+body.theme-dark {
+    background-color: #1e1e1e !important;
+    color: #d4d4d4 !important;
+}
+
+body.theme-light {
+    background-color: #ffffff !important;
+    color: #212529 !important;
+}
+
+/* Garante que o tema seja aplicado imediatamente */
+body.theme-dark,
+body.theme-light {
+    transition: none !important;
+}
+
+/* Previne transições em elementos específicos durante mudança de tema */
+.theme-transitioning .card,
+.theme-transitioning .form-control,
+.theme-transitioning .form-select,
+.theme-transitioning .table,
+.theme-transitioning .list-group-item,
+.theme-transitioning .btn,
+.theme-transitioning .nav-link,
+.theme-transitioning .sidebar,
+.theme-transitioning .top-navbar {
+    transition: none !important;
+}
+
+/* =====================================================
+   RESET E BASE STYLES
+   ===================================================== */
+
+/* Override do background geral */
+body {
+    background-color: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+    transition: background-color var(--transition-medium), color var(--transition-medium);
+}
+
+/* Força a aplicação dos temas quando a classe estiver presente */
+body.theme-dark {
+    background-color: #1e1e1e !important;
+    color: #d4d4d4 !important;
+}
+
+body.theme-light {
+    background-color: #ffffff !important;
+    color: #212529 !important;
+}
+
+/* =====================================================
+   LAYOUT PRINCIPAL
+   ===================================================== */
+
+/* Sidebar */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: var(--sidebar-width);
+    z-index: 1000;
+    padding: 0;
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--sidebar-border);
+    transition: transform var(--transition-medium);
+    box-shadow: var(--shadow-medium);
+}
+
+/* Força cores da sidebar por tema */
+body.theme-dark .sidebar {
+    background-color: #252525 !important;
+    border-right-color: #404040 !important;
+}
+
+body.theme-light .sidebar {
+    background-color: #ffffff !important;
+    border-right-color: #dee2e6 !important;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.main-content {
+    margin-left: var(--sidebar-width);
+    transition: margin-left var(--transition-medium);
+    padding-top: 56px;
+    width: calc(100% - var(--sidebar-width));
+    background-color: var(--bg-primary);
+}
+
+.sidebar .nav-link {
+    color: var(--sidebar-text);
+    font-weight: var(--fw-medium);
+    border-radius: var(--border-radius-md);
+    margin: 0.2rem 0.8rem;
+    padding: 0.7rem 1rem;
+    transition: all var(--transition-fast);
+    border: 1px solid transparent;
+    font-size: var(--fs-sm);
+}
+
+.sidebar .nav-link:hover {
+    color: var(--sidebar-text-hover);
+    background-color: var(--sidebar-bg-hover);
+    border-color: var(--sidebar-border);
+    transform: translateX(4px);
+}
+
+.sidebar .nav-link.active {
+    color: var(--accent-blue);
+    background-color: rgba(86, 156, 214, 0.15);
+    border-color: rgba(86, 156, 214, 0.3);
+}
+
+.sidebar .nav-link .bi {
+    width: 20px;
+    margin-right: 0.7rem;
+    font-size: var(--fs-sm);
+}
+
+.sidebar .nav-link.bg-transparent:hover {
+    color: var(--sidebar-text-hover) !important;
+    background-color: var(--sidebar-bg-hover) !important;
+    border-color: var(--sidebar-border) !important;
+}
+
+/* Estilos específicos dos links da sidebar por tema */
+body.theme-light .sidebar .nav-link {
+    color: #495057 !important;
+}
+
+body.theme-light .sidebar .nav-link:hover {
+    color: #212529 !important;
+    background-color: #f8f9fa !important;
+    border-color: #dee2e6 !important;
+}
+
+body.theme-light .sidebar .nav-link.active {
+    color: #0066cc !important;
+    background-color: rgba(0, 102, 204, 0.1) !important;
+    border-color: rgba(0, 102, 204, 0.25) !important;
+}
+
+body.theme-dark .sidebar .nav-link {
+    color: #9d9d9d !important;
+}
+
+body.theme-dark .sidebar .nav-link:hover {
+    color: #d4d4d4 !important;
+    background-color: #363636 !important;
+    border-color: #404040 !important;
+}
+
+body.theme-dark .sidebar .nav-link.active {
+    color: #569cd6 !important;
+    background-color: rgba(86, 156, 214, 0.15) !important;
+    border-color: rgba(86, 156, 214, 0.3) !important;
+}
+
+.sidebar-header {
+    padding: 1.2rem 1rem;
+    font-size: var(--fs-lg);
+    color: var(--sidebar-text-hover);
+    white-space: nowrap;
+    border-bottom: 1px solid var(--sidebar-border);
+    background-color: var(--bg-tertiary);
+    font-weight: var(--fw-semibold);
+}
+
+.sidebar-header a {
+    color: var(--sidebar-text-hover) !important;
+    text-decoration: none !important;
+    transition: color var(--transition-fast);
+}
+
+.sidebar-header a:hover {
+    color: var(--accent-blue) !important;
+}
+
+/* Estilos específicos do header da sidebar por tema */
+body.theme-light .sidebar-header {
+    background-color: #e9ecef !important;
+    color: #212529 !important;
+    border-bottom-color: #dee2e6 !important;
+}
+
+body.theme-light .sidebar-header a {
+    color: #212529 !important;
+}
+
+body.theme-light .sidebar-header a:hover {
+    color: #0066cc !important;
+}
+
+body.theme-dark .sidebar-header {
+    background-color: #2d2d2d !important;
+    color: #d4d4d4 !important;
+    border-bottom-color: #404040 !important;
+}
+
+body.theme-dark .sidebar-header a {
+    color: #d4d4d4 !important;
+}
+
+body.theme-dark .sidebar-header a:hover {
+    color: #569cd6 !important;
+}
+
+.sidebar-divider {
+    height: 1px;
+    background-color: var(--sidebar-border);
+    margin: 0.8rem 0.8rem;
+}
+
+/* Top Navbar */
+.top-navbar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: var(--sidebar-width);
+    z-index: 999;
+    transition: left var(--transition-medium);
+    background-color: var(--bg-secondary) !important;
+    border-bottom: 1px solid var(--border-light) !important;
+}
+
+.top-navbar .navbar-nav .nav-link {
+    color: var(--text-secondary) !important;
+    transition: color var(--transition-fast);
+}
+
+.top-navbar .navbar-nav .nav-link:hover {
+    color: var(--text-primary) !important;
+}
+
+.top-navbar .dropdown-menu {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--border-radius-md) !important;
+    box-shadow: var(--shadow-soft) !important;
+}
+
+.top-navbar .dropdown-item {
+    color: var(--text-primary) !important;
+    border: none !important;
+    background: transparent !important;
+    padding: var(--spacing-sm) var(--spacing-md) !important;
+    transition: background-color var(--transition-fast);
+}
+
+.top-navbar .dropdown-item:hover {
+    background-color: var(--bg-hover) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Estilos específicos da top navbar por tema */
+body.theme-light .top-navbar {
+    background-color: #f8f9fa !important;
+    border-bottom-color: #dee2e6 !important;
+}
+
+body.theme-light .top-navbar .navbar-nav .nav-link {
+    color: #495057 !important;
+}
+
+body.theme-light .top-navbar .navbar-nav .nav-link:hover {
+    color: #212529 !important;
+}
+
+body.theme-light .top-navbar .dropdown-menu {
+    background-color: #ffffff !important;
+    border-color: #dee2e6 !important;
+}
+
+body.theme-light .top-navbar .dropdown-item {
+    color: #212529 !important;
+}
+
+body.theme-light .top-navbar .dropdown-item:hover {
+    background-color: #f5f5f5 !important;
+    color: #212529 !important;
+}
+
+body.theme-dark .top-navbar {
+    background-color: #252525 !important;
+    border-bottom-color: #404040 !important;
+}
+
+body.theme-dark .top-navbar .navbar-nav .nav-link {
+    color: #9d9d9d !important;
+}
+
+body.theme-dark .top-navbar .navbar-nav .nav-link:hover {
+    color: #d4d4d4 !important;
+}
+
+body.theme-dark .top-navbar .dropdown-menu {
+    background-color: #2b2b2b !important;
+    border-color: #404040 !important;
+}
+
+body.theme-dark .top-navbar .dropdown-item {
+    color: #d4d4d4 !important;
+}
+
+body.theme-dark .top-navbar .dropdown-item:hover {
+    background-color: #363636 !important;
+    color: #d4d4d4 !important;
+}
+
+/* Container Principal */
+.container-fluid {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+/* =====================================================
+   COMPONENTES BASE
+   ===================================================== */
+
+/* Cards */
+.card {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-light) !important;
+    color: var(--text-primary) !important;
+    border-radius: var(--border-radius-lg) !important;
+    box-shadow: var(--shadow-soft) !important;
+    transition: all var(--transition-fast);
+}
+
+/* Força cores dos cards por tema */
+body.theme-dark .card {
+    background-color: #2b2b2b !important;
+    border-color: #404040 !important;
+    color: #d4d4d4 !important;
+}
+
+body.theme-dark .card-header {
+    background-color: #2d2d2d !important;
+    border-bottom-color: #404040 !important;
+    color: #d4d4d4 !important;
+}
+
+body.theme-light .card {
+    background-color: #ffffff !important;
+    border-color: #dee2e6 !important;
+    color: #212529 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+body.theme-light .card-header {
+    background-color: #ffffff !important;
+    border-bottom-color: #b5bbc1 !important;
+    color: #212529 !important;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-medium) !important;
+}
+
+.card-header {
+    background-color: var(--bg-tertiary) !important;
+    border-bottom: 1px solid var(--border-light) !important;
+    color: var(--text-primary) !important;
+    font-weight: var(--fw-medium);
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0 !important;
+}
+
+.card-body {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+}
+
+/* Botões */
+.btn-primary {
+    background-color: var(--accent-blue) !important;
+    border-color: var(--accent-blue) !important;
+    color: var(--text-inverse) !important;
+    font-weight: var(--fw-medium) !important;
+    border-radius: var(--border-radius-md) !important;
+    transition: all var(--transition-fast);
+}
+
+.btn-primary:hover {
+    background-color: rgba(86, 156, 214, 0.8) !important;
+    border-color: rgba(86, 156, 214, 0.8) !important;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-light) !important;
+    color: var(--text-secondary) !important;
+    font-weight: var(--fw-medium) !important;
+    border-radius: var(--border-radius-md) !important;
+    transition: all var(--transition-fast);
+}
+
+.btn-secondary:hover {
+    background-color: var(--bg-hover) !important;
+    border-color: var(--border-medium) !important;
+    color: var(--text-primary) !important;
+}
+
+.btn-success {
+    background-color: var(--accent-green) !important;
+    border-color: var(--accent-green) !important;
+    color: var(--text-inverse) !important;
+    font-weight: var(--fw-medium) !important;
+    border-radius: var(--border-radius-md) !important;
+}
+
+.btn-success:hover {
+    background-color: rgba(78, 201, 176, 0.8) !important;
+    border-color: rgba(78, 201, 176, 0.8) !important;
+    transform: translateY(-1px);
+}
+
+.btn-danger {
+    background-color: var(--accent-red) !important;
+    border-color: var(--accent-red) !important;
+    color: var(--text-inverse) !important;
+    font-weight: var(--fw-medium) !important;
+    border-radius: var(--border-radius-md) !important;
+}
+
+.btn-danger:hover {
+    background-color: rgba(244, 135, 113, 0.8) !important;
+    border-color: rgba(244, 135, 113, 0.8) !important;
+    transform: translateY(-1px);
+}
+
+/* Estilos específicos dos botões por tema */
+body.theme-light .btn-primary {
+    background-color: #0066cc !important;
+    border-color: #0066cc !important;
+    color: #ffffff !important;
+}
+
+body.theme-light .btn-primary:hover {
+    background-color: #0052a3 !important;
+    border-color: #0052a3 !important;
+}
+
+body.theme-light .btn-secondary {
+    background-color: #ffffff !important;
+    border-color: #ced4da !important;
+    color: #495057 !important;
+}
+
+body.theme-light .btn-secondary:hover {
+    background-color: #e9ecef !important;
+    border-color: #adb5bd !important;
+    color: #212529 !important;
+}
+
+body.theme-light .btn-success {
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+    color: #ffffff !important;
+}
+
+body.theme-light .btn-success:hover {
+    background-color: #218838 !important;
+    border-color: #1e7e34 !important;
+}
+
+body.theme-light .btn-danger {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+    color: #ffffff !important;
+}
+
+body.theme-light .btn-danger:hover {
+    background-color: #c82333 !important;
+    border-color: #bd2130 !important;
+}
+
+/* =====================================================
+   FORMULÁRIOS
+   ===================================================== */
+
+.form-control {
+    background-color: var(--bg-hover) !important;
+    border: 1px solid var(--border-light) !important;
+    color: var(--text-primary) !important;
+    border-radius: var(--border-radius-md) !important;
+    transition: all var(--transition-fast);
+}
+
+.form-control:focus {
+    background-color: var(--bg-hover) !important;
+    border-color: var(--accent-blue) !important;
+    color: var(--text-primary) !important;
+    box-shadow: 0 0 0 0.2rem rgba(86, 156, 214, 0.25) !important;
+}
+
+.form-control::placeholder {
+    color: var(--text-muted) !important;
+}
+
+.form-label {
+    color: var(--text-secondary) !important;
+    font-weight: var(--fw-medium);
+}
+
+.form-select {
+    background-color: var(--bg-hover) !important;
+    border: 1px solid var(--border-light) !important;
+    color: var(--text-primary) !important;
+    border-radius: var(--border-radius-md) !important;
+}
+
+.form-select:focus {
+    border-color: var(--accent-blue) !important;
+    box-shadow: 0 0 0 0.2rem rgba(86, 156, 214, 0.25) !important;
+}
+
+.form-check-input {
+    background-color: var(--bg-hover) !important;
+    border: 1px solid var(--border-light) !important;
+}
+
+.form-check-input:checked {
+    background-color: var(--accent-blue) !important;
+    border-color: var(--accent-blue) !important;
+}
+
+.form-check-label {
+    color: var(--text-primary) !important;
+}
+
+/* Estilos específicos dos formulários por tema */
+body.theme-light .form-control {
+    background-color: #ffffff !important;
+    border-color: #ced4da !important;
+    color: #212529 !important;
+}
+
+body.theme-light .form-control:focus {
+    border-color: #0066cc !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.25) !important;
+}
+
+body.theme-light .form-control::placeholder {
+    color: #6c757d !important;
+}
+
+body.theme-light .form-label {
+    color: #495057 !important;
+}
+
+body.theme-light .form-select {
+    background-color: #ffffff !important;
+    border-color: #ced4da !important;
+    color: #212529 !important;
+}
+
+body.theme-light .form-select:focus {
+    border-color: #0066cc !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.25) !important;
+}
+
+body.theme-light .form-check-input {
+    background-color: #ffffff !important;
+    border-color: #ced4da !important;
+}
+
+body.theme-light .form-check-input:checked {
+    background-color: #0066cc !important;
+    border-color: #0066cc !important;
+}
+
+body.theme-light .form-check-label {
+    color: #212529 !important;
+}
+
+/* =====================================================
+   TABELAS
+   ===================================================== */
+
+.table {
+    background-color: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+}
+
+.table thead th {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-secondary) !important;
+    border-bottom: 1px solid var(--border-light) !important;
+    font-weight: var(--fw-medium);
+    text-transform: uppercase;
+    font-size: var(--fs-sm);
+    letter-spacing: 0.5px;
+    padding: var(--spacing-md) var(--spacing-sm);
+}
+
+.table tbody tr {
+    border-bottom: 1px solid var(--border-dark) !important;
+    transition: background-color var(--transition-fast);
+}
+
+.table tbody tr:hover {
+    background-color: var(--bg-hover) !important;
+}
+
+.table tbody tr:last-child {
+    border-bottom: none !important;
+}
+
+.table tbody td {
+    color: var(--text-primary) !important;
+    border: none !important;
+    padding: var(--spacing-md) var(--spacing-sm);
+    vertical-align: middle;
+}
+
+/* Estilos específicos das tabelas por tema */
+body.theme-light .table {
+    background-color: #ffffff !important;
+    color: #212529 !important;
+}
+
+body.theme-light .table thead th {
+    background-color: #f8f9fa !important;
+    color: #495057 !important;
+    border-bottom-color: #dee2e6 !important;
+}
+
+body.theme-light .table tbody tr {
+    border-bottom-color: #dee2e6 !important;
+}
+
+body.theme-light .table tbody tr:hover {
+    background-color: #f5f5f5 !important;
+}
+
+body.theme-light .table tbody td {
+    color: #212529 !important;
+}
+
+body.theme-dark .table {
+    background-color: #2b2b2b !important;
+    color: #d4d4d4 !important;
+}
+
+body.theme-dark .table thead th {
+    background-color: #252525 !important;
+    color: #9d9d9d !important;
+    border-bottom-color: #404040 !important;
+}
+
+body.theme-dark .table tbody tr {
+    border-bottom-color: #3c3c3c !important;
+}
+
+body.theme-dark .table tbody tr:hover {
+    background-color: #363636 !important;
+}
+
+body.theme-dark .table tbody td {
+    color: #d4d4d4 !important;
+}
+
+/* =====================================================
+   ALERTAS
+   ===================================================== */
+
+.alert {
+    border-radius: var(--border-radius-md) !important;
+    border: 1px solid !important;
+    font-weight: var(--fw-medium);
+}
+
+.alert-success {
+    background-color: var(--success-bg) !important;
+    color: var(--success-color) !important;
+    border-color: var(--success-border) !important;
+}
+
+.alert-danger {
+    background-color: var(--danger-bg) !important;
+    color: var(--danger-color) !important;
+    border-color: var(--danger-border) !important;
+}
+
+.alert-warning {
+    background-color: var(--warning-bg) !important;
+    color: var(--warning-color) !important;
+    border-color: var(--warning-border) !important;
+}
+
+.alert-info {
+    background-color: var(--info-bg) !important;
+    color: var(--info-color) !important;
+    border-color: var(--info-border) !important;
+}
+
+.btn-close {
+    filter: invert(1) !important;
+}
+
+/* =====================================================
+   MODAIS
+   ===================================================== */
+
+.modal-content {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--border-radius-lg) !important;
+}
+
+.modal-header {
+    background-color: var(--bg-tertiary) !important;
+    border-bottom: 1px solid var(--border-light) !important;
+    color: var(--text-primary) !important;
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0 !important;
+}
+
+.modal-body {
+    background-color: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+}
+
+.modal-footer {
+    background-color: var(--bg-card) !important;
+    border-top: 1px solid var(--border-light) !important;
+    border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg) !important;
+}
+
+.modal-title {
+    color: var(--text-primary) !important;
+}
+
+.btn-close {
+    filter: invert(1) !important;
+}
+
+/* =====================================================
+   BADGES E STATUS
+   ===================================================== */
+
+.badge {
+    font-weight: var(--fw-medium) !important;
+    border-radius: var(--border-radius-md) !important;
+    padding: 0.4rem 0.8rem !important;
+    font-size: var(--fs-xs) !important;
+}
+
+.bg-success {
+    background-color: var(--success-bg) !important;
+    color: var(--success-color) !important;
+    border: 1px solid var(--success-border) !important;
+}
+
+.bg-danger {
+    background-color: var(--danger-bg) !important;
+    color: var(--danger-color) !important;
+    border: 1px solid var(--danger-border) !important;
+}
+
+.bg-warning {
+    background-color: var(--warning-bg) !important;
+    color: var(--warning-color) !important;
+    border: 1px solid var(--warning-border) !important;
+}
+
+.bg-info {
+    background-color: var(--info-bg) !important;
+    color: var(--info-color) !important;
+    border: 1px solid var(--info-border) !important;
+}
+
+/* =====================================================
+   PAGINAÇÃO
+   ===================================================== */
+
+.pagination .page-link {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-light) !important;
+    color: var(--text-primary) !important;
+    border-radius: var(--border-radius-md) !important;
+    margin: 0 2px;
+    transition: all var(--transition-fast);
+}
+
+.pagination .page-link:hover {
+    background-color: var(--bg-hover) !important;
+    border-color: var(--accent-blue) !important;
+    color: var(--accent-blue) !important;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--accent-blue) !important;
+    border-color: var(--accent-blue) !important;
+    color: var(--text-inverse) !important;
+}
+
+/* =====================================================
+   SELECT2 DARK THEME
+   ===================================================== */
+
+.select2-container--bootstrap-5 .select2-dropdown {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--border-radius-md) !important;
+}
+
+.select2-container--bootstrap-5 .select2-results__option {
+    color: var(--text-primary) !important;
+}
+
+.select2-container--bootstrap-5 .select2-results__option--highlighted {
+    background-color: var(--bg-hover) !important;
+}
+
+.select2-container--bootstrap-5 .select2-selection {
+    background-color: var(--bg-hover) !important;
+    border: 1px solid var(--border-light) !important;
+    color: var(--text-primary) !important;
+    border-radius: var(--border-radius-md) !important;
+}
+
+/* =====================================================
+   ELEMENTOS ADICIONAIS QUE PODEM NÃO TER TEMA DARK
+   ===================================================== */
+
+/* List Groups */
+.list-group-item {
+    background-color: var(--bg-card) !important;
+    border-color: var(--border-light) !important;
+    color: var(--text-primary) !important;
+}
+
+body.theme-dark .list-group-item {
+    background-color: #2b2b2b !important;
+    border-color: #404040 !important;
+    color: #d4d4d4 !important;
+}
+
+body.theme-light .list-group-item {
+    background-color: #ffffff !important;
+    border-color: #dee2e6 !important;
+    color: #212529 !important;
+}
+
+/* Input Groups */
+.input-group-text {
+    background-color: var(--bg-tertiary) !important;
+    border-color: var(--border-light) !important;
+    color: var(--text-secondary) !important;
+}
+
+body.theme-dark .input-group-text {
+    background-color: #2d2d2d !important;
+    border-color: #404040 !important;
+    color: #9d9d9d !important;
+}
+
+body.theme-light .input-group-text {
+    background-color: #e9ecef !important;
+    border-color: #ced4da !important;
+    color: #495057 !important;
+}
+
+/* Text Utilities */
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+body.theme-dark .text-muted {
+    color: #6d6d6d !important;
+}
+
+body.theme-light .text-muted {
+    color: #6c757d !important;
+}
+
+/* Links */
+a {
+    color: var(--accent-blue) !important;
+}
+
+body.theme-dark a {
+    color: #569cd6 !important;
+}
+
+body.theme-light a {
+    color: #0066cc !important;
+}
+
+a:hover {
+    color: var(--accent-blue) !important;
+    text-decoration: none !important;
+}
+
+/* Hr */
+hr {
+    border-color: var(--border-light) !important;
+}
+
+body.theme-dark hr {
+    border-color: #404040 !important;
+}
+
+body.theme-light hr {
+    border-color: #dee2e6 !important;
+}
+
+/* Small text */
+small {
+    color: var(--text-muted) !important;
+}
+
+/* Strong text */
+strong {
+    color: var(--text-primary) !important;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary) !important;
+}
+
+/* Paragraphs */
+p {
+    color: var(--text-primary) !important;
+}
+
+/* Spans */
+span {
+    color: inherit !important;
+}
+
+/* Icons */
+.bi {
+    color: inherit !important;
+}
+
+/* Toast notifications */
+.toast {
+    background-color: var(--bg-card) !important;
+    border-color: var(--border-light) !important;
+    color: var(--text-primary) !important;
+}
+
+body.theme-dark .toast {
+    background-color: #2b2b2b !important;
+    border-color: #404040 !important;
+    color: #d4d4d4 !important;
+}
+
+body.theme-light .toast {
+    background-color: #ffffff !important;
+    border-color: #dee2e6 !important;
+    color: #212529 !important;
+}
+
+/* Tooltips */
+.tooltip-inner {
+    background-color: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-light) !important;
+}
+
+body.theme-dark .tooltip-inner {
+    background-color: #2b2b2b !important;
+    color: #d4d4d4 !important;
+    border-color: #404040 !important;
+}
+
+body.theme-light .tooltip-inner {
+    background-color: #ffffff !important;
+    color: #212529 !important;
+    border-color: #dee2e6 !important;
+}
+
+/* Popovers */
+.popover {
+    background-color: var(--bg-card) !important;
+    border-color: var(--border-light) !important;
+    color: var(--text-primary) !important;
+}
+
+body.theme-dark .popover {
+    background-color: #2b2b2b !important;
+    border-color: #404040 !important;
+    color: #d4d4d4 !important;
+}
+
+body.theme-light .popover {
+    background-color: #ffffff !important;
+    border-color: #dee2e6 !important;
+    color: #212529 !important;
+}
+
+/* Progress bars */
+.progress {
+    background-color: var(--bg-tertiary) !important;
+}
+
+body.theme-dark .progress {
+    background-color: #2d2d2d !important;
+}
+
+body.theme-light .progress {
+    background-color: #e9ecef !important;
+}
+
+/* Nav tabs */
+.nav-tabs .nav-link {
+    color: var(--text-secondary) !important;
+    background-color: transparent !important;
+    border-color: var(--border-light) !important;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--text-primary) !important;
+    background-color: var(--bg-card) !important;
+    border-color: var(--border-light) var(--border-light) var(--bg-card) !important;
+}
+
+body.theme-dark .nav-tabs .nav-link {
+    color: #9d9d9d !important;
+    border-color: #404040 !important;
+}
+
+body.theme-dark .nav-tabs .nav-link.active {
+    color: #d4d4d4 !important;
+    background-color: #2b2b2b !important;
+    border-color: #404040 #404040 #2b2b2b !important;
+}
+
+body.theme-light .nav-tabs .nav-link {
+    color: #495057 !important;
+    border-color: #dee2e6 !important;
+}
+
+body.theme-light .nav-tabs .nav-link.active {
+    color: #212529 !important;
+    background-color: #ffffff !important;
+    border-color: #dee2e6 #dee2e6 #ffffff !important;
+}
+
+/* =====================================================
+   CRISPY FORMS E ELEMENTOS ESPECÍFICOS
+   ===================================================== */
+
+/* Crispy Forms */
+.asteriskField {
+    color: var(--accent-red) !important;
+}
+
+body.theme-dark .asteriskField {
+    color: #f48771 !important;
+}
+
+body.theme-light .asteriskField {
+    color: #dc3545 !important;
+}
+
+/* Form validation states */
+.is-valid {
+    border-color: var(--accent-green) !important;
+}
+
+.is-invalid {
+    border-color: var(--accent-red) !important;
+}
+
+body.theme-dark .is-valid {
+    border-color: #4ec9b0 !important;
+}
+
+body.theme-dark .is-invalid {
+    border-color: #f48771 !important;
+}
+
+body.theme-light .is-valid {
+    border-color: #28a745 !important;
+}
+
+body.theme-light .is-invalid {
+    border-color: #dc3545 !important;
+}
+
+/* Invalid feedback */
+.invalid-feedback {
+    color: var(--accent-red) !important;
+}
+
+body.theme-dark .invalid-feedback {
+    color: #f48771 !important;
+}
+
+body.theme-light .invalid-feedback {
+    color: #dc3545 !important;
+}
+
+/* Valid feedback */
+.valid-feedback {
+    color: var(--accent-green) !important;
+}
+
+body.theme-dark .valid-feedback {
+    color: #4ec9b0 !important;
+}
+
+body.theme-light .valid-feedback {
+    color: #28a745 !important;
+}
+
+/* =====================================================
+   ELEMENTOS DE NAVEGAÇÃO E MENUS
+   ===================================================== */
+
+/* Dropdown menus específicos */
+.dropdown-menu {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-light) !important;
+    box-shadow: var(--shadow-medium) !important;
+}
+
+body.theme-dark .dropdown-menu {
+    background-color: #2b2b2b !important;
+    border-color: #404040 !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+}
+
+body.theme-light .dropdown-menu {
+    background-color: #ffffff !important;
+    border-color: #dee2e6 !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Dropdown dividers */
+.dropdown-divider {
+    border-color: var(--border-light) !important;
+}
+
+body.theme-dark .dropdown-divider {
+    border-color: #404040 !important;
+}
+
+body.theme-light .dropdown-divider {
+    border-color: #dee2e6 !important;
+}
+
+/* =====================================================
+   ELEMENTOS DE ESTADO E FEEDBACK
+   ===================================================== */
+
+/* Loading spinners */
+.spinner-border {
+    color: var(--accent-blue) !important;
+}
+
+body.theme-dark .spinner-border {
+    color: #569cd6 !important;
+}
+
+body.theme-light .spinner-border {
+    color: #0066cc !important;
+}
+
+/* Placeholder text */
+::placeholder {
+    color: var(--text-muted) !important;
+    opacity: 1 !important;
+}
+
+body.theme-dark ::placeholder {
+    color: #6d6d6d !important;
+}
+
+body.theme-light ::placeholder {
+    color: #6c757d !important;
+}
+
+/* Selection text */
+::selection {
+    background-color: var(--accent-blue) !important;
+    color: var(--text-inverse) !important;
+}
+
+body.theme-dark ::selection {
+    background-color: #569cd6 !important;
+    color: #1e1e1e !important;
+}
+
+body.theme-light ::selection {
+    background-color: #0066cc !important;
+    color: #ffffff !important;
+}
+
+/* =====================================================
+   ELEMENTOS DE SCROLLBAR
+   ===================================================== */
+
+/* Webkit scrollbars */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary) !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-medium) !important;
+    border-radius: 4px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--border-dark) !important;
+}
+
+body.theme-dark ::-webkit-scrollbar-track {
+    background: #252525 !important;
+}
+
+body.theme-dark ::-webkit-scrollbar-thumb {
+    background: #505050 !important;
+}
+
+body.theme-dark ::-webkit-scrollbar-thumb:hover {
+    background: #3c3c3c !important;
+}
+
+body.theme-light ::-webkit-scrollbar-track {
+    background: #f8f9fa !important;
+}
+
+body.theme-light ::-webkit-scrollbar-thumb {
+    background: #ced4da !important;
+}
+
+body.theme-light ::-webkit-scrollbar-thumb:hover {
+    background: #adb5bd !important;
+}
+
+/* =====================================================
+   ELEMENTOS DE FOCUS E ACESSIBILIDADE
+   ===================================================== */
+
+/* Focus outlines */
+:focus {
+    outline-color: var(--accent-blue) !important;
+}
+
+body.theme-dark :focus {
+    outline-color: #569cd6 !important;
+}
+
+body.theme-light :focus {
+    outline-color: #0066cc !important;
+}
+
+/* Skip links */
+.sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* =====================================================
+   ELEMENTOS DE IMPRESSÃO
+   ===================================================== */
+
+@media print {
+    body.theme-dark {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+    }
+    
+    body.theme-dark .card,
+    body.theme-dark .modal-content,
+    body.theme-dark .dropdown-menu {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        border-color: #000000 !important;
+    }
+    
+    body.theme-dark .btn {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        border-color: #000000 !important;
+    }
+}
+
+/* =====================================================
+   PÁGINA DE ALUNOS APTOS - CORREÇÕES ESPECÍFICAS
+   ===================================================== */
+
+/* Força tema dark em elementos específicos da página de alunos aptos */
+body.theme-dark .table-row {
+    background-color: #2b2b2b !important;
+    color: #d4d4d4 !important;
+}
+
+body.theme-dark .table-row:hover {
+    background-color: #363636 !important;
+}
+
+body.theme-dark .table-row td {
+    background-color: transparent !important;
+    color: #d4d4d4 !important;
+    border-color: #404040 !important;
+}
+
+/* Status badge específico para alunos aptos */
+body.theme-dark .status-badge.status-success {
+    background: rgba(78, 201, 176, 0.15) !important;
+    color: #4ec9b0 !important;
+    border-color: rgba(78, 201, 176, 0.3) !important;
+}
+
+body.theme-light .status-badge.status-success {
+    background: rgba(40, 167, 69, 0.1) !important;
+    color: #28a745 !important;
+    border-color: rgba(40, 167, 69, 0.25) !important;
+}
+
+/* Texto dentro das células da tabela */
+body.theme-dark .table-row .fw-medium {
+    color: #d4d4d4 !important;
+}
+
+body.theme-dark .table-row .text-warning {
+    color: #ce9178 !important;
+}
+
+/* Ícones na tabela */
+body.theme-dark .table-row .bi {
+    color: inherit !important;
+}
+
+/* Empty state específico para alunos aptos */
+body.theme-dark .empty-state-icon {
+    color: #6d6d6d !important;
+    font-size: 3rem !important;
+}
+
+body.theme-dark .empty-state h5 {
+    color: #9d9d9d !important;
+}
+
+body.theme-dark .empty-state p {
+    color: #6d6d6d !important;
+}
+
+body.theme-dark .empty-state small {
+    color: #9d9d9d !important;
+    font-weight: 400 !important;
+}
+
+/* Pagination do log de mensagens */
+body.theme-dark .pagination .page-link {
+    background-color: #2b2b2b !important;
+    border-color: #404040 !important;
+    color: #d4d4d4 !important;
+}
+
+body.theme-dark .pagination .page-link:hover {
+    background-color: #404040 !important;
+    border-color: #569cd6 !important;
+    color: #569cd6 !important;
+}
+
+body.theme-dark .pagination .page-item.active .page-link {
+    background-color: #569cd6 !important;
+    border-color: #569cd6 !important;
+    color: #1e1e1e !important;
+}
+
+/* Alert info específico */
+body.theme-dark .alert-info {
+    background-color: rgba(86, 156, 214, 0.15) !important;
+    color: #569cd6 !important;
+    border-color: rgba(86, 156, 214, 0.3) !important;
+}
+
+body.theme-light .alert-info {
+    background-color: rgba(0, 102, 204, 0.1) !important;
+    color: #0066cc !important;
+    border-color: rgba(0, 102, 204, 0.25) !important;
+}
+
+/* Força cores em elementos específicos da tabela */
+body.theme-dark .futuristic-table tbody tr {
+    background-color: #2b2b2b !important;
+    color: #d4d4d4 !important;
+}
+
+body.theme-dark .futuristic-table tbody tr:hover {
+    background-color: #363636 !important;
+}
+
+body.theme-dark .futuristic-table tbody td {
+    background-color: transparent !important;
+    color: #d4d4d4 !important;
+    border-color: #404040 !important;
+}
+
+body.theme-dark .futuristic-table thead th {
+    background-color: #252525 !important;
+    color: #9d9d9d !important;
+    border-bottom-color: #404040 !important;
+}
+
+/* Força cores em elementos de texto específicos */
+body.theme-dark .table-row .student-name {
+    color: #d4d4d4 !important;
+}
+
+body.theme-dark .table-row .student-meta {
+    color: #6d6d6d !important;
+}
+
+body.theme-dark .table-row .fw-medium {
+    color: #d4d4d4 !important;
+}
+
+/* Força cores em elementos de navegação e estrutura */
+body.theme-dark .table-responsive {
+    background-color: transparent !important;
+}
+
+body.theme-dark .card-body {
+    background-color: #2b2b2b !important;
+    color: #d4d4d4 !important;
+}
+
+/* Força cores em elementos de avatar */
+body.theme-dark .student-avatar {
+    border-color: #404040 !important;
+}
+
+body.theme-dark .student-avatar-placeholder {
+    background-color: #363636 !important;
+    border-color: #404040 !important;
+    color: #6d6d6d !important;
+}
+
+/* Força cores em elementos de graduação */
+body.theme-dark .table-row .d-flex.align-items-center {
+    color: #d4d4d4 !important;
+}
+
+/* Força cores em elementos de modalidade */
+body.theme-dark .table-row .fw-medium {
+    color: #d4d4d4 !important;
+}
+
+/* Força cores em elementos de graduação atual */
+body.theme-dark .table-row .d-flex.align-items-center .text-warning {
+    color: #ce9178 !important;
+}
+
+/* Força cores em elementos de tempo de aptidão */
+body.theme-dark .status-badge {
+    background-color: rgba(78, 201, 176, 0.15) !important;
+    color: #4ec9b0 !important;
+    border-color: rgba(78, 201, 176, 0.3) !important;
+}
+
+/* Força cores em elementos de ícones */
+body.theme-dark .table-row .bi {
+    color: inherit !important;
+}
+
+body.theme-dark .table-row .bi-person-badge {
+    color: #6d6d6d !important;
+}
+
+body.theme-dark .table-row .bi-award {
+    color: #ce9178 !important;
+}
+
+body.theme-dark .table-row .bi-check-circle {
+    color: #4ec9b0 !important;
+}
+
+/* Força cores em elementos de alerta */
+body.theme-dark .alert-info .bi {
+    color: #569cd6 !important;
+}
+
+body.theme-dark .alert-info strong {
+    color: #569cd6 !important;
+}
+
+/* Força cores em elementos de section header */
+body.theme-dark .section-header .bi-person-check-fill {
+    color: #4ec9b0 !important;
+}
+
+body.theme-dark .section-header .bi-info-circle {
+    color: #569cd6 !important;
+}
+
+/* Força cores em elementos de empty state */
+body.theme-dark .empty-state .bi-calendar-x {
+    color: #6d6d6d !important;
+}
+
+/* Força cores em elementos de table responsive */
+body.theme-dark .table-responsive {
+    background-color: transparent !important;
+}
+
+/* Força cores em elementos de futuristic table */
+body.theme-dark .futuristic-table {
+    background-color: transparent !important;
+}
+
+body.theme-dark .futuristic-table-container {
+    background-color: #2b2b2b !important;
+    border-color: #404040 !important;
+}
+
+/* Força cores em elementos de card */
+body.theme-dark .card {
+    background-color: #2b2b2b !important;
+    border-color: #404040 !important;
+    color: #d4d4d4 !important;
+}
+
+body.theme-dark .card-body {
+    background-color: #2b2b2b !important;
+    color: #d4d4d4 !important;
+}
+
+/* =====================================================
+   RELATÓRIO DE FREQUÊNCIA - CORREÇÕES ESPECÍFICAS
+   ===================================================== */
+
+/* Força tema dark no relatório de frequência */
+body.theme-dark .table-hover tbody tr {
+    background-color: #2b2b2b !important;
+    color: #d4d4d4 !important;
+}
+
+body.theme-dark .table-hover tbody tr:hover {
+    background-color: #363636 !important;
+}
+
+body.theme-dark .table-hover tbody td {
+    background-color: transparent !important;
+    color: #d4d4d4 !important;
+    border-color: #404040 !important;
+}
+
+body.theme-dark .table-hover thead th {
+    background-color: #252525 !important;
+    color: #9d9d9d !important;
+    border-bottom-color: #404040 !important;
+}
+
+/* Texto específico do relatório de frequência */
+body.theme-dark .fs-5 {
+    color: #d4d4d4 !important;
+}
+
+body.theme-dark .text-center {
+    color: #d4d4d4 !important;
+}
+
+/* Ícones do relatório de frequência */
+body.theme-dark .bi-graph-up {
+    color: #569cd6 !important;
+}
+
+body.theme-dark .bi-filter {
+    color: #569cd6 !important;
+}
+
+/* =====================================================
+   RELATÓRIO FINANCEIRO - CORREÇÕES ESPECÍFICAS
+   ===================================================== */
+
+/* Força tema dark no relatório financeiro */
+body.theme-dark .table-sm tbody tr {
+    background-color: #2b2b2b !important;
+    color: #d4d4d4 !important;
+}
+
+body.theme-dark .table-sm tbody tr:hover {
+    background-color: #363636 !important;
+}
+
+body.theme-dark .table-sm tbody td {
+    background-color: transparent !important;
+    color: #d4d4d4 !important;
+    border-color: #404040 !important;
+}
+
+body.theme-dark .table-sm thead th {
+    background-color: #252525 !important;
+    color: #9d9d9d !important;
+    border-bottom-color: #404040 !important;
+}
+
+/* KPIs do relatório financeiro */
+body.theme-dark .card-subtitle {
+    color: #6d6d6d !important;
+}
+
+body.theme-dark .text-success {
+    color: #4ec9b0 !important;
+}
+
+body.theme-dark .text-warning {
+    color: #ce9178 !important;
+}
+
+body.theme-dark .fw-bold {
+    color: #d4d4d4 !important;
+}
+
+/* Badges do relatório financeiro */
+body.theme-dark .bg-success {
+    background-color: rgba(78, 201, 176, 0.15) !important;
+    color: #4ec9b0 !important;
+    border-color: rgba(78, 201, 176, 0.3) !important;
+}
+
+body.theme-dark .bg-danger {
+    background-color: rgba(244, 135, 113, 0.15) !important;
+    color: #f48771 !important;
+    border-color: rgba(244, 135, 113, 0.3) !important;
+}
+
+body.theme-dark .bg-warning {
+    background-color: rgba(206, 145, 120, 0.15) !important;
+    color: #ce9178 !important;
+    border-color: rgba(206, 145, 120, 0.3) !important;
+}
+
+body.theme-dark .text-dark {
+    color: #d4d4d4 !important;
+}
+
+/* Ícones do relatório financeiro */
+body.theme-dark .bi-bar-chart-line-fill {
+    color: #569cd6 !important;
+}
+
+/* =====================================================
+   LOG DE MENSAGENS - CORREÇÕES ESPECÍFICAS
+   ===================================================== */
+
+/* Força tema dark no log de mensagens */
+body.theme-dark .report-header {
+    background-color: #2b2b2b !important;
+    border-color: #404040 !important;
+    color: #d4d4d4 !important;
+}
+
+body.theme-dark .report-title {
+    color: #d4d4d4 !important;
+}
+
+body.theme-dark .report-icon {
+    color: #c586c0 !important;
+}
+
+body.theme-dark .search-card {
+    background-color: #2b2b2b !important;
+    border-color: #404040 !important;
+}
+
+body.theme-dark .search-btn {
+    background-color: #569cd6 !important;
+    border-color: #569cd6 !important;
+    color: #1e1e1e !important;
+}
+
+body.theme-dark .search-btn:hover {
+    background-color: rgba(86, 156, 214, 0.8) !important;
+    border-color: rgba(86, 156, 214, 0.8) !important;
+}
+
+body.theme-dark .messages-table {
+    background-color: #2b2b2b !important;
+}
+
+body.theme-dark .messages-table th {
+    background-color: #252525 !important;
+    color: #9d9d9d !important;
+}
+
+body.theme-dark .messages-table tbody tr {
+    border-bottom-color: #3c3c3c !important;
+    background-color: #2b2b2b !important;
+    color: #d4d4d4 !important;
+}
+
+body.theme-dark .messages-table tbody tr:hover {
+    background-color: #363636 !important;
+}
+
+body.theme-dark .messages-table td {
+    color: #d4d4d4 !important;
+}
+
+/* Status badges do log de mensagens */
+body.theme-dark .status-success {
+    background-color: rgba(78, 201, 176, 0.15) !important;
+    color: #4ec9b0 !important;
+    border-color: rgba(78, 201, 176, 0.3) !important;
+}
+
+body.theme-dark .status-error {
+    background-color: rgba(244, 135, 113, 0.15) !important;
+    color: #f48771 !important;
+    border-color: rgba(244, 135, 113, 0.3) !important;
+}
+
+/* Type badges do log de mensagens */
+body.theme-dark .type-badge {
+    background-color: #404040 !important;
+    color: #d4d4d4 !important;
+    border-color: #569cd6 !important;
+    border-width: 1px !important;
+    border-style: solid !important;
+    font-weight: 600 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.theme-light .type-badge {
+    background-color: #e9ecef !important;
+    color: #495057 !important;
+    border-color: #0066cc !important;
+    border-width: 1px !important;
+    border-style: solid !important;
+    font-weight: 600 !important;
+}
+
+/* Message content do log de mensagens */
+body.theme-dark .message-content {
+    background-color: #2b2b2b !important;
+    border-color: #404040 !important;
+    color: #e0e0e0 !important;
+    border-width: 1px !important;
+    border-style: solid !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+body.theme-light .message-content {
+    background-color: #f8f9fa !important;
+    border-color: #dee2e6 !important;
+    color: #495057 !important;
+    border-width: 1px !important;
+    border-style: solid !important;
+}
+
+/* Separadores entre mensagens */
+body.theme-dark .messages-table tbody tr {
+    border-bottom-color: #404040 !important;
+    border-bottom-width: 2px !important;
+    border-bottom-style: solid !important;
+}
+
+body.theme-light .messages-table tbody tr {
+    border-bottom-color: #dee2e6 !important;
+    border-bottom-width: 1px !important;
+    border-bottom-style: solid !important;
+}
+
+/* Hover mais visível */
+body.theme-dark .messages-table tbody tr:hover {
+    background-color: #404040 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+    transform: translateY(-1px) !important;
+    transition: all 0.2s ease !important;
+}
+
+body.theme-light .messages-table tbody tr:hover {
+    background-color: #f5f5f5 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    transform: translateY(-1px) !important;
+    transition: all 0.2s ease !important;
+}
+
+/* Headers da tabela mais destacados */
+body.theme-dark .messages-table th {
+    background-color: #1e1e1e !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    border-bottom: 2px solid #569cd6 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.theme-light .messages-table th {
+    background-color: #e9ecef !important;
+    color: #495057 !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    border-bottom: 2px solid #0066cc !important;
+}
+
+/* Status badges mais visíveis */
+body.theme-dark .status-success {
+    background-color: rgba(78, 201, 176, 0.25) !important;
+    color: #4ec9b0 !important;
+    border-color: #4ec9b0 !important;
+    border-width: 2px !important;
+    font-weight: 600 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+    box-shadow: 0 2px 4px rgba(78, 201, 176, 0.2) !important;
+}
+
+body.theme-dark .status-error {
+    background-color: rgba(244, 135, 113, 0.25) !important;
+    color: #f48771 !important;
+    border-color: #f48771 !important;
+    border-width: 2px !important;
+    font-weight: 600 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+    box-shadow: 0 2px 4px rgba(244, 135, 113, 0.2) !important;
+}
+
+/* Data/hora mais destacada */
+body.theme-dark .messages-table td:first-child {
+    font-weight: 600 !important;
+    color: #ffffff !important;
+}
+
+body.theme-dark .messages-table td:first-child small {
+    color: #9d9d9d !important;
+    font-weight: 400 !important;
+}
+
+/* Nome do aluno mais destacado */
+body.theme-dark .messages-table td:nth-child(2) {
+    font-weight: 600 !important;
+    color: #ffffff !important;
+}
+
+body.theme-dark .messages-table td:nth-child(2) small {
+    color: #9d9d9d !important;
+    font-weight: 400 !important;
+}
+
+/* Ícones mais visíveis */
+body.theme-dark .messages-table .bi {
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3)) !important;
+}
+
+/* Search card mais destacado */
+body.theme-dark .search-card {
+    background-color: #2b2b2b !important;
+    border-color: #569cd6 !important;
+    border-width: 2px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Report header mais destacado */
+body.theme-dark .report-header {
+    background-color: #1e1e1e !important;
+    border-color: #569cd6 !important;
+    border-width: 2px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Título mais destacado */
+body.theme-dark .report-title {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Subtítulo mais visível */
+body.theme-dark .report-header p {
+    color: #b0b0b0 !important;
+    font-weight: 500 !important;
+}
+
+/* Empty state mais visível */
+body.theme-dark .empty-state {
+    background-color: #2b2b2b !important;
+    color: #9d9d9d !important;
+    border-color: #404040 !important;
+    border-width: 2px !important;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+body.theme-dark .empty-state h5 {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}
+
+body.theme-dark .empty-state p {
+    color: #b0b0b0 !important;
+    font-weight: 500 !important;
+}
+
+body.theme-dark .empty-state small {
+    color: #9d9d9d !important;
+    font-weight: 400 !important;
+}
+
+/* Border top do log de mensagens */
+body.theme-dark .border-top {
+    border-color: #404040 !important;
+}
+
+/* Ícones específicos do log de mensagens */
+body.theme-dark .bi-chat-left-text-fill {
+    color: #c586c0 !important;
+}
+
+body.theme-dark .bi-info-circle {
+    color: #569cd6 !important;
+}
+
+body.theme-dark .bi-search {
+    color: #569cd6 !important;
+}
+
+body.theme-dark .bi-calendar-event {
+    color: #569cd6 !important;
+}
+
+body.theme-dark .bi-calendar-check {
+    color: #569cd6 !important;
+}
+
+body.theme-dark .bi-check-circle {
+    color: #4ec9b0 !important;
+}
+
+body.theme-dark .bi-x-circle {
+    color: #f48771 !important;
+}
+
+body.theme-dark .bi-person-badge {
+    color: #6d6d6d !important;
+}
+
+body.theme-dark .bi-chat-x {
+    color: #6d6d6d !important;
+}
+
+body.theme-dark .bi-chevron-double-left,
+body.theme-dark .bi-chevron-left,
+body.theme-dark .bi-chevron-right,
+body.theme-dark .bi-chevron-double-right {
+    color: inherit !important;
+}
+
+/* =====================================================
+   RESPONSIVIDADE
+   ===================================================== */
+
+@media (max-width: 991.98px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+    .top-navbar {
+        left: 0;
+    }
+    .sidebar.active {
+        transform: translateX(0);
+    }
+}
+
+/* =====================================================
+   TEMA SWITCHER
+   ===================================================== */
+
+.theme-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1040;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-xl);
+    padding: var(--spacing-sm);
+    box-shadow: var(--shadow-medium);
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.theme-toggle button {
+    background: transparent;
+    border: none;
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius-md);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.theme-toggle button:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.theme-toggle button.active {
+    background: var(--accent-blue);
+    color: var(--text-inverse);
+}
+
+/* Garante visibilidade do theme toggle */
+.theme-toggle {
+    opacity: 0.9;
+}
+
+.theme-toggle:hover {
+    opacity: 1;
+}
+
+/* Força estilos do theme toggle para ambos os temas */
+body.theme-dark .theme-toggle {
+    background: #2b2b2b !important;
+    border-color: #404040 !important;
+}
+
+body.theme-dark .theme-toggle button {
+    color: #9d9d9d !important;
+}
+
+body.theme-dark .theme-toggle button:hover {
+    background: #363636 !important;
+    color: #d4d4d4 !important;
+}
+
+body.theme-dark .theme-toggle button.active {
+    background: #569cd6 !important;
+    color: #1e1e1e !important;
+}
+
+body.theme-light .theme-toggle {
+    background: #ffffff !important;
+    border-color: #dee2e6 !important;
+}
+
+body.theme-light .theme-toggle button {
+    color: #6c757d !important;
+}
+
+body.theme-light .theme-toggle button:hover {
+    background: #f5f5f5 !important;
+    color: #212529 !important;
+}
+
+body.theme-light .theme-toggle button.active {
+    background: #0d6efd !important;
+    color: #ffffff !important;
+}
+
+/* =====================================================
+   UTILITY CLASSES
+   ===================================================== */
+
+.text-primary-theme {
+    color: var(--text-primary) !important;
+}
+
+.text-secondary-theme {
+    color: var(--text-secondary) !important;
+}
+
+.text-muted-theme {
+    color: var(--text-muted) !important;
+}
+
+.bg-primary-theme {
+    background-color: var(--bg-primary) !important;
+}
+
+.bg-secondary-theme {
+    background-color: var(--bg-secondary) !important;
+}
+
+.bg-card-theme {
+    background-color: var(--bg-card) !important;
+}
+
+.border-theme {
+    border-color: var(--border-light) !important;
+}
+
+.shadow-theme-soft {
+    box-shadow: var(--shadow-soft) !important;
+}
+
+.shadow-theme-medium {
+    box-shadow: var(--shadow-medium) !important;
+}
+
+.shadow-theme-strong {
+    box-shadow: var(--shadow-strong) !important;
+}

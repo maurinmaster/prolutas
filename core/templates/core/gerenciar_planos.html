@@ -1,0 +1,37 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Gerenciar Planos - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header"><h4><i class="bi bi-file-text-fill"></i> Adicionar Novo Plano</h4></div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="d-grid mt-3"><button type="submit" class="btn btn-primary">Adicionar Plano</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <h4>Planos Cadastrados</h4>
+        <div class="list-group">
+            {% for plano in planos %}
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                <span><strong>{{ plano.nome }}</strong> - R$ {{ plano.valor }}</span>
+                <form action="{% url 'deletar_plano' plano.pk %}" method="post" onsubmit="return confirm('Tem certeza?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir"><i class="bi bi-trash"></i></button>
+                </form>
+            </div>
+            {% empty %}
+            <div class="list-group-item">Nenhum plano cadastrado.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

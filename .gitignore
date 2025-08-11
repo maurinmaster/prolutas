@@ -1,0 +1,34 @@
+# Ambientes Virtuais
+venv/
+env/
+.venv/
+
+# Arquivos de Cache do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Banco de Dados
+db.sqlite3
+*.sqlite3-journal
+
+# Arquivos de Ambiente (MUITO IMPORTANTE)
+.env
+*.env
+
+# Arquivos Estáticos e de Mídia Gerados pelo Django
+staticfiles/
+media/
+
+# Arquivos de IDEs e Editores
+.vscode/
+.idea/
+*.swp
+
+# Logs
+logs/
+*.log
+
+# Dependências do Node.js
+/whatsapp_gateway/node_modules

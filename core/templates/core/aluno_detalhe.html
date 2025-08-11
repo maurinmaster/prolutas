@@ -1,0 +1,177 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ aluno.nome_completo }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<style>
+    /* Estilos para o nosso calendário */
+    .calendar-table td.presente {
+        background-color: #d1e7dd !important; /* Verde do Bootstrap Success */
+        font-weight: bold;
+        color: #0f5132;
+        border-radius: 50% !important;
+    }
+    .calendar-table td {
+        text-align: center;
+        vertical-align: middle;
+        width: 14.28%;
+        height: 50px;
+    }
+    .calendar-table th {
+        text-align: center;
+        font-weight: 500;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-person-badge"></i> Perfil do Aluno</h2>
+    <a href="{% url 'dashboard' %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-5 col-lg-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body text-center">
+                {% if aluno.foto %}
+                    <img src="{{ aluno.foto.url }}" class="rounded-circle mb-3" width="150" height="150" style="object-fit: cover;" alt="Foto de {{ aluno.nome_completo }}">
+                {% else %}
+                    <i class="bi bi-person-circle fs-1 text-muted mb-3 d-block"></i>
+                {% endif %}
+                
+                <h4 class="card-title">{{ aluno.nome_completo }}</h4>
+                <p class="text-muted mb-1">{{ aluno.contato }}</p>
+                <p class="text-muted"><small>Membro desde: {{ aluno.data_matricula|date:"d/m/Y" }}</small></p>
+                
+                <a href="{% url 'aluno_edit' aluno.pk %}" class="btn btn-sm btn-outline-secondary">Editar Cadastro</a>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-calendar-check"></i> Calendário de Frequência
+                </h5>
+            </div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <a href="?ano={{ mes_anterior.year }}&mes={{ mes_anterior.month }}" class="btn btn-sm btn-outline-secondary">&lt; Mês Anterior</a>
+                <h5 class="mb-0">{{ data_atual|date:"F Y"|title }}</h5>
+                <a href="?ano={{ mes_seguinte.year }}&mes={{ mes_seguinte.month }}" class="btn btn-sm btn-outline-secondary">Mês Seguinte &gt;</a>
+            </div>
+            <div class="card-body p-2">
+                <table class="table table-bordered calendar-table">
+                    <thead>
+                        <tr>
+                            <th>Dom</th><th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th><th>Sáb</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for semana in semanas_do_mes %}
+                        <tr>
+                            {% for dia in semana %}
+                                {% if dia == 0 %}
+                                    <td></td> {# Dia fora do mês atual #}
+                                {% else %}
+                                    <td class="{% if dia in presencas_dias %}presente{% endif %}">
+                                        {{ dia }}
+                                    </td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7 col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#graduacao">Graduação</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#financeiro">Financeiro</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body tab-content p-3">
+                <div class="tab-pane fade show active" id="graduacao">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5>Graduação Atual: <strong>{{ aluno.graduacao_atual.nome|default:"Não registrada" }}</strong></h5>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#promoverAlunoModal">
+                            <i class="bi bi-trophy-fill"></i> Promover Aluno
+                        </button>
+                    </div>
+                    <h6>Histórico de Graduações</h6>
+                    <ul class="list-group list-group-flush">
+                        {% for h in historico_graduacao %}
+                            <li class="list-group-item ps-0">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <span>
+                                        {% if h.graduacao.icone_arquivo %}
+                                            <img src="{% static 'core/img/graduacoes/'|add:h.graduacao.icone_arquivo %}" alt="{{ h.graduacao.nome }}" width="20" class="me-2">
+                                        {% else %}
+                                            <i class="bi bi-award me-2"></i>
+                                        {% endif %}
+                                        <strong>{{ h.graduacao.nome }}</strong> ({{ h.graduacao.modalidade.nome }})
+                                    </span>
+                                    <small class="text-muted">{{ h.data_promocao|date:"d/m/Y" }}</small>
+                                </div>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item ps-0">Nenhum histórico de promoção encontrado.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="tab-pane fade" id="financeiro">
+                    <h5>Histórico de Assinaturas e Faturas</h5>
+                    {% for assinatura in assinaturas %}
+                        <div class="mb-3">
+                            <strong>Plano: {{ assinatura.plano.nome }}</strong> ({{ assinatura.get_status_display }})
+                            <ul class="list-unstyled ms-3 mt-2">
+                                {% for fatura in assinatura.faturas.all %}
+                                <li>
+                                    Fatura de R$ {{ fatura.valor|floatformat:2 }} | Venc: {{ fatura.data_vencimento|date:"d/m/Y" }} | 
+                                    {% if fatura.status == "Paga" %}<span class="badge bg-success">Paga</span>
+                                    {% elif fatura.status == "Vencida" %}<span class="badge bg-danger">Vencida</span>
+                                    {% else %}<span class="badge bg-warning text-dark">Pendente</span>{% endif %}
+                                </li>
+                                {% empty %}
+                                <li><small class="text-muted">Nenhuma fatura gerada para esta assinatura.</small></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% empty %}
+                        <p>Nenhuma assinatura encontrada para este aluno.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="promoverAlunoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Promover {{ aluno.nome_completo }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ promo_form|crispy }}
+                    <div class="d-grid mt-3">
+                        <button type="submit" class="btn btn-primary">Confirmar Promoção</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

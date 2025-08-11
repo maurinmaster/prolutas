@@ -1,0 +1,623 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Dashboard - {{ block.super }}{% endblock %}
+
+{% block content %}
+
+{% if kpis_financeiros %}
+<!-- KPIs Futuristas -->
+<div class="row g-4 mb-5">
+  <div class="col-12 col-sm-6 col-lg-3">
+    <div class="kpi-card success-gradient" data-aos="fade-up" data-aos-delay="100">
+      <div class="kpi-icon-container">
+        <i class="bi bi-cash-coin"></i>
+        </div>
+      <div class="kpi-content">
+        <div class="kpi-label">Faturamento</div>
+        <div class="kpi-sublabel">Mês Atual</div>
+        <div class="kpi-value">R$ {{ kpis_financeiros.faturamento_mes_atual|floatformat:2 }}</div>
+      </div>
+      <div class="kpi-glow success-glow"></div>
+    </div>
+  </div>
+  
+  <div class="col-12 col-sm-6 col-lg-3">
+    <div class="kpi-card info-gradient" data-aos="fade-up" data-aos-delay="200">
+      <div class="kpi-icon-container">
+        <i class="bi bi-calendar2-month"></i>
+        </div>
+      <div class="kpi-content">
+        <div class="kpi-label">Faturamento</div>
+        <div class="kpi-sublabel">{{ kpis_financeiros.periodo_mes_passado }}</div>
+        <div class="kpi-value">R$ {{ kpis_financeiros.faturamento_mes_passado|floatformat:2 }}</div>
+      </div>
+      <div class="kpi-glow info-glow"></div>
+    </div>
+  </div>
+  
+  <div class="col-12 col-sm-6 col-lg-3">
+    <div class="kpi-card danger-gradient" data-aos="fade-up" data-aos-delay="300">
+      <div class="kpi-icon-container">
+        <i class="bi bi-exclamation-octagon"></i>
+        </div>
+      <div class="kpi-content">
+        <div class="kpi-label">Inadimplência</div>
+        <div class="kpi-sublabel">Total Pendente</div>
+        <div class="kpi-value">R$ {{ kpis_financeiros.inadimplencia|floatformat:2 }}</div>
+      </div>
+      <div class="kpi-glow danger-glow"></div>
+    </div>
+  </div>
+  
+  <div class="col-12 col-sm-6 col-lg-3">
+    <div class="kpi-card primary-gradient" data-aos="fade-up" data-aos-delay="400">
+      <div class="kpi-icon-container">
+        <i class="bi bi-person-plus"></i>
+        </div>
+      <div class="kpi-content">
+        <div class="kpi-label">Novas Assinaturas</div>
+        <div class="kpi-sublabel">Mês Passado</div>
+        <div class="kpi-value">{{ kpis_financeiros.novas_assinaturas }}</div>
+      </div>
+      <div class="kpi-glow primary-glow"></div>
+    </div>
+  </div>
+  
+  <div class="col-12 col-sm-6 col-lg-3">
+    <div class="kpi-card warning-gradient" data-aos="fade-up" data-aos-delay="500">
+      <div class="kpi-icon-container">
+        <i class="bi bi-activity"></i>
+        </div>
+      <div class="kpi-content">
+        <div class="kpi-label">Risco de Evasão</div>
+        <div class="kpi-sublabel">Alunos em Alerta</div>
+        <div class="kpi-value">{{ alunos_em_risco|length }}</div>
+      </div>
+      <div class="kpi-glow warning-glow"></div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Assistente de Gestão Virtual -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body p-0">
+    <!-- Header do Assistente -->
+    <div class="d-flex align-items-center gap-3 p-4">
+      <div class="position-relative">
+        <div class="ai-avatar d-flex align-items-center justify-content-center rounded-circle shadow">
+          🤖
+        </div>
+        <div class="ai-status position-absolute bottom-0 end-0 rounded-circle border-2"></div>
+      </div>
+      <div>
+        <h5 class="mb-0 fw-bold">Assistente Virtual Pro-Lutas</h5>
+        <small>🟢 Online • Sempre pronto para ajudar</small>
+      </div>
+      <div class="ms-auto">
+        <button class="btn btn-sm" onclick="clearChat()" title="Limpar conversa">
+          <i class="bi bi-arrow-clockwise"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Área de Chat -->
+    <div class="p-3">
+      <div id="ia-response-area" class="chat-area mb-3">
+        <!-- Mensagem de boas-vindas -->
+        <div class="welcome-message text-center py-4">
+          <div class="ai-thinking mb-3">
+            <div class="thinking-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+          <p class="mb-0">Iniciando assistente virtual...</p>
+        </div>
+    </div>
+
+      <!-- Sugestões Rápidas -->
+      <div id="ia-suggestions-area" class="suggestions-container mb-3">
+      <!-- sugestões aparecem aqui -->
+    </div>
+
+      <!-- Input de Pergunta -->
+    <form id="ia-question-form">
+      {% csrf_token %}
+        <div class="input-group">
+          <span class="input-group-text">
+            <i class="bi bi-chat-dots"></i>
+          </span>
+          <input type="text" id="ia-question-input" 
+                 class="form-control"
+                 placeholder="Digite sua pergunta ou dúvida..." required>
+          <button class="btn px-4" type="submit" id="ia-submit-btn">
+          <span id="ia-spinner" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true" style="display:none;"></span>
+            <i class="bi bi-send-fill me-1"></i>
+          Enviar
+        </button>
+      </div>
+    </form>
+    </div>
+  </div>
+</div>
+
+<!-- Seção de Alunos Futurista -->
+<div class="section-header mb-4" data-aos="fade-up">
+  <div class="section-title-container">
+    <div class="section-icon">
+      <i class="bi bi-people-fill"></i>
+    </div>
+    <div class="section-title-content">
+      <h4 class="section-title">Alunos Matriculados</h4>
+      <p class="section-subtitle">Gerencie todos os estudantes da academia</p>
+    </div>
+  </div>
+  <div class="section-actions">
+    <a href="{% url 'aluno_add' %}" class="btn-futuristic primary">
+      <i class="bi bi-plus-circle me-2"></i>
+      <span>Adicionar Aluno</span>
+      <div class="btn-glow"></div>
+    </a>
+  </div>
+</div>
+
+<div class="futuristic-table-container" data-aos="fade-up" data-aos-delay="200">
+  <div class="table-header">
+    <div class="table-header-content">
+      <i class="bi bi-database me-2"></i>
+      <span>Base de Dados dos Alunos</span>
+    </div>
+    <div class="table-stats">
+      <span class="stat-badge">{{ alunos|length }} registros</span>
+    </div>
+  </div>
+  
+  <div class="table-content">
+    <div class="table-responsive">
+      <table class="futuristic-table">
+        <thead>
+          <tr>
+            <th style="width:80px">Avatar</th>
+            <th>Identificação</th>
+            <th>Documento</th>
+            <th>Status</th>
+            <th style="width:120px">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for aluno in alunos %}
+          <tr class="table-row" data-student-id="{{ aluno.pk }}">
+            <td>
+              <div class="avatar-container">
+              {% if aluno.foto %}
+                <img src="{{ aluno.foto.url }}" alt="Foto de {{ aluno.nome_completo }}"
+                       class="student-avatar">
+              {% else %}
+                  <div class="student-avatar-placeholder">
+                    <i class="bi bi-person"></i>
+                </div>
+              {% endif %}
+                <div class="avatar-status-indicator {% if aluno.ativo %}active{% else %}inactive{% endif %}"></div>
+              </div>
+            </td>
+            <td>
+              <div class="student-info">
+                <a href="{% url 'aluno_detalhe' aluno.pk %}" class="student-name">{{ aluno.nome_completo }}</a>
+                <div class="student-meta">Matrícula #{{ aluno.pk|stringformat:"04d" }}</div>
+              </div>
+            </td>
+            <td>
+              <div class="document-info">
+                {{ aluno.cpf|default:"<span class='text-muted'>Não informado</span>" }}
+              </div>
+            </td>
+            <td>
+              {% if aluno.ativo %}
+                <span class="status-badge active">
+                  <i class="bi bi-check-circle me-1"></i>Ativo
+                </span>
+              {% else %}
+                <span class="status-badge inactive">
+                  <i class="bi bi-x-circle me-1"></i>Inativo
+                </span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="action-buttons">
+                <a href="{% url 'aluno_edit' aluno.pk %}" class="action-btn edit" title="Editar">
+                <i class="bi bi-pencil-square"></i>
+              </a>
+                <button type="button" class="action-btn delete"
+                      data-bs-toggle="modal" data-bs-target="#deleteModal"
+                      data-aluno-pk="{{ aluno.pk }}" title="Excluir">
+                <i class="bi bi-trash"></i>
+              </button>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5" class="empty-state">
+              <div class="empty-content">
+                <i class="bi bi-person-plus fs-1 text-muted mb-3"></i>
+                <h5 class="text-muted">Nenhum aluno cadastrado</h5>
+                <p class="text-muted">Comece adicionando o primeiro aluno da academia</p>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Seção de Turmas Futurista -->
+<div class="section-header mb-4 mt-5" data-aos="fade-up">
+  <div class="section-title-container">
+    <div class="section-icon">
+      <i class="bi bi-collection-fill"></i>
+    </div>
+    <div class="section-title-content">
+      <h4 class="section-title">Turmas Ativas</h4>
+      <p class="section-subtitle">Organize e gerencie as turmas da academia</p>
+    </div>
+  </div>
+  <div class="section-actions">
+    <a href="{% url 'turma_add' %}" class="btn-futuristic secondary">
+      <i class="bi bi-plus-circle me-2"></i>
+      <span>Nova Turma</span>
+      <div class="btn-glow"></div>
+    </a>
+  </div>
+</div>
+
+<div class="row g-4">
+  {% for turma in turmas %}
+  <div class="col-md-6 col-xl-4" data-aos="fade-up" data-aos-delay="{% cycle 100 200 300 400 500 600 %}">
+    <div class="class-card">
+      <div class="class-card-header">
+        <div class="class-icon">
+          <i class="bi bi-mortarboard-fill"></i>
+        </div>
+        <div class="class-status-indicator active"></div>
+      </div>
+      
+      <div class="class-card-content">
+        <div class="class-title">{{ turma.modalidade.nome }}</div>
+        <div class="class-professor">
+          <i class="bi bi-person-circle me-1"></i>
+          {{ turma.professor.nome_completo|default:"Sem professor definido" }}
+        </div>
+        
+        <div class="class-stats">
+          <div class="stat-item">
+            <i class="bi bi-people-fill"></i>
+            <span>{{ turma.alunos.count }}{% if turma.limite_alunos %}/{{ turma.limite_alunos }}{% endif %} alunos</span>
+          </div>
+        </div>
+        
+        <div class="class-schedule">
+          <div class="schedule-header">
+            <i class="bi bi-clock-fill me-1"></i>
+            <span>Horários</span>
+          </div>
+          {% for horario in turma.horarios.all %}
+            <div class="schedule-item">
+              <span class="schedule-day">{{ horario.dias_semana }}</span>
+              <span class="schedule-time">{{ horario.horario_inicio|time:"H:i" }} - {{ horario.horario_fim|time:"H:i" }}</span>
+            </div>
+          {% empty %}
+            <div class="schedule-item empty">
+              <span class="text-muted">Nenhum horário definido</span>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      
+      <div class="class-card-actions">
+        <a href="{% url 'turma_edit' turma.pk %}" class="action-btn-card primary">
+          <i class="bi bi-gear-fill me-1"></i>
+          Gerenciar
+        </a>
+        <button type="button" class="action-btn-card danger"
+                  data-bs-toggle="modal" data-bs-target="#deleteTurmaModal"
+                data-turma-pk="{{ turma.pk }}">
+          <i class="bi bi-trash me-1"></i>
+          Excluir
+        </button>
+        </div>
+      
+      <div class="class-card-glow"></div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12" data-aos="fade-up">
+    <div class="empty-classes-state">
+      <div class="empty-classes-content">
+        <i class="bi bi-collection-fill fs-1 mb-3"></i>
+        <h5>Nenhuma turma cadastrada</h5>
+        <p class="text-muted">Crie a primeira turma para começar a organizar os alunos</p>
+        <a href="{% url 'turma_add' %}" class="btn-futuristic primary mt-3">
+          <i class="bi bi-plus-circle me-2"></i>
+          <span>Criar Primeira Turma</span>
+          <div class="btn-glow"></div>
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Modal Futurista - Excluir Aluno -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content futuristic-modal">
+      <div class="modal-header">
+        <div class="modal-icon danger">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+        <div class="modal-title-content">
+        <h5 class="modal-title" id="deleteModalLabel">Confirmar Exclusão</h5>
+          <p class="modal-subtitle">Esta ação é irreversível</p>
+        </div>
+        <button type="button" class="btn-close-futuristic" data-bs-dismiss="modal" aria-label="Close">
+          <i class="bi bi-x"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="warning-content">
+          <p>Tem certeza de que deseja excluir este aluno?</p>
+          <div class="warning-details">
+            <i class="bi bi-info-circle me-2"></i>
+            <span>Todos os dados, histórico e registros serão permanentemente removidos do sistema.</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-futuristic secondary" data-bs-dismiss="modal">
+          <i class="bi bi-arrow-left me-2"></i>
+          <span>Cancelar</span>
+        </button>
+        <form id="deleteForm" method="post" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn-futuristic danger">
+            <i class="bi bi-trash me-2"></i>
+            <span>Confirmar Exclusão</span>
+            <div class="btn-glow"></div>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Futurista - Excluir Turma -->
+<div class="modal fade" id="deleteTurmaModal" tabindex="-1" aria-labelledby="deleteTurmaModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content futuristic-modal">
+      <div class="modal-header">
+        <div class="modal-icon warning">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+        <div class="modal-title-content">
+        <h5 class="modal-title" id="deleteTurmaModalLabel">Confirmar Exclusão</h5>
+          <p class="modal-subtitle">Remover turma do sistema</p>
+      </div>
+        <button type="button" class="btn-close-futuristic" data-bs-dismiss="modal" aria-label="Close">
+          <i class="bi bi-x"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="warning-content">
+          <p>Tem certeza de que deseja excluir esta turma?</p>
+          <div class="warning-details">
+            <i class="bi bi-info-circle me-2"></i>
+            <span>A turma será removida, mas os alunos permanecerão no sistema.</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-futuristic secondary" data-bs-dismiss="modal">
+          <i class="bi bi-arrow-left me-2"></i>
+          <span>Cancelar</span>
+        </button>
+        <form id="deleteTurmaForm" method="post" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn-futuristic danger">
+            <i class="bi bi-trash me-2"></i>
+            <span>Confirmar Exclusão</span>
+            <div class="btn-glow"></div>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- AOS Library for animations -->
+<link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+
+<script>
+// Inicializar AOS
+AOS.init({
+  duration: 600,
+  easing: 'ease-in-out',
+  once: true,
+  offset: 50
+});
+</script>
+
+<script>
+$(document).ready(function() {
+  // ================== CHAT IA ==================
+  const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+  const responseArea = $('#ia-response-area');
+  const suggestionsArea = $('#ia-suggestions-area');
+  const form = $('#ia-question-form');
+  const questionInput = $('#ia-question-input');
+  const submitBtn = $('#ia-submit-btn');
+  const spinner = $('#ia-spinner');
+
+  function addMessage(text, sender) {
+    // Remover mensagem de boas-vindas se existir
+    $('.welcome-message').remove();
+    
+    const messageDiv = $('<div>').addClass(`message-bubble ${sender}`);
+    const bubbleContent = $('<div>').addClass('bubble-content');
+    const timeStamp = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    
+    if (sender === 'user') {
+      bubbleContent.html(`<div>${text}</div><div class="message-time text-end">${timeStamp}</div>`);
+    } else {
+      bubbleContent.html(`<div style="white-space: pre-wrap;">${text}</div><div class="message-time">${timeStamp}</div>`);
+    }
+    
+    messageDiv.append(bubbleContent);
+    responseArea.append(messageDiv);
+    responseArea.scrollTop(responseArea[0].scrollHeight);
+  }
+
+  function renderSuggestions(suggestions) {
+    suggestionsArea.empty();
+    if (suggestions && suggestions.length) {
+      suggestions.forEach(s => {
+        suggestionsArea.append(
+          $('<button>', {
+            type: 'button',
+            class: 'btn btn-outline-secondary btn-sm suggestion-btn',
+            text: s
+          })
+        );
+      });
+    }
+  }
+
+  function submitQuestion(questionText, isInitial=false) {
+    if (!questionText) return;
+    if (!isInitial) addMessage(questionText, 'user');
+
+    questionInput.val('');
+    suggestionsArea.empty();
+    submitBtn.prop('disabled', true);
+    spinner.show();
+
+    // Adicionar indicador de digitação
+    const typingDiv = $('<div>').addClass('message-bubble assistant');
+    const typingContent = $('<div>').addClass('bubble-content');
+    typingContent.html(`
+      <div class="ai-typing">
+        <div class="thinking-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        ${isInitial ? 'Gerando resumo diário...' : 'Assistente está digitando...'}
+      </div>
+    `);
+    typingDiv.append(typingContent);
+    
+    // Remover mensagem de boas-vindas se existir
+    $('.welcome-message').remove();
+    
+    responseArea.append(typingDiv);
+    responseArea.scrollTop(responseArea[0].scrollHeight);
+
+    fetch("{% url 'ask_ia_agent' %}", {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','X-CSRFToken': csrfToken},
+      body: JSON.stringify({question: questionText})
+    })
+    .then(r => r.json())
+    .then(data => {
+      // Remover indicador de digitação
+      responseArea.children().last().remove();
+      addMessage(data.answer || data.error || 'Ocorreu um erro desconhecido.', 'assistant');
+      renderSuggestions(data.suggestions);
+    })
+    .catch(err => {
+      console.error(err);
+      // Remover indicador de digitação
+      responseArea.children().last().remove();
+      addMessage('❌ Erro de comunicação. Verifique o console do servidor para mais detalhes.', 'assistant');
+    })
+    .finally(() => {
+      submitBtn.prop('disabled', false);
+      spinner.hide();
+    });
+  }
+
+  function showInitialMenu() {
+    responseArea.html(`
+      <div class="welcome-message text-center py-4">
+        <div class="ai-thinking mb-3">
+          <div class="thinking-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+        <p class="text-muted mb-0">Iniciando assistente virtual...</p>
+      </div>
+    `);
+    suggestionsArea.empty();
+    submitQuestion('__INITIAL_SUMMARY__', true);
+  }
+
+  // Função global para limpar chat
+  window.clearChat = function() {
+    responseArea.html(`
+      <div class="welcome-message text-center py-4">
+        <div class="ai-thinking mb-3">
+          <div class="thinking-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+        <p class="text-muted mb-0">Reiniciando assistente virtual...</p>
+      </div>
+    `);
+    suggestionsArea.empty();
+    questionInput.val('');
+    setTimeout(() => {
+      submitQuestion('__INITIAL_SUMMARY__', true);
+    }, 1000);
+  };
+
+  form.on('submit', function(e){
+    e.preventDefault();
+    submitQuestion(questionInput.val().trim());
+  });
+
+  suggestionsArea.on('click', '.suggestion-btn', function(){
+    submitQuestion($(this).text());
+  });
+
+  showInitialMenu();
+
+  // ================== MODAIS ==================
+  const deleteModal = document.getElementById('deleteModal');
+  if (deleteModal) {
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+      const alunoPK = event.relatedTarget.getAttribute('data-aluno-pk');
+      deleteModal.querySelector('#deleteForm').setAttribute('action', `/aluno/${alunoPK}/excluir/`);
+    });
+  }
+
+  const deleteTurmaModal = document.getElementById('deleteTurmaModal');
+  if (deleteTurmaModal) {
+    deleteTurmaModal.addEventListener('show.bs.modal', function (event) {
+      const turmaPK = event.relatedTarget.getAttribute('data-turma-pk');
+      deleteTurmaModal.querySelector('#deleteTurmaForm').setAttribute('action', `/turma/${turmaPK}/excluir/`);
+    });
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório Gerencial</title>
+    <style>
+        /* Relatório Gerencial PDF - Tema Dark */
+        body { 
+            font-family: sans-serif; 
+            color: #d4d4d4; 
+            background-color: #1e1e1e;
+            line-height: 1.6;
+        }
+        h1, h2 { 
+            color: #569cd6; 
+            border-bottom: 2px solid #404040; 
+            padding-bottom: 8px; 
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        .container { 
+            width: 90%; 
+            margin: auto; 
+            background-color: #1e1e1e;
+            padding: 20px;
+        }
+        .card { 
+            border: 1px solid #404040; 
+            border-radius: 8px; 
+            padding: 20px; 
+            margin-bottom: 25px; 
+            background-color: #2b2b2b;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .card h3 { 
+            margin-top: 0; 
+            color: #4ec9b0; 
+            font-weight: 600;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            background-color: #2b2b2b;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        th, td { 
+            padding: 12px; 
+            text-align: left; 
+            border-bottom: 1px solid #3c3c3c; 
+        }
+        th { 
+            background-color: #252525; 
+            color: #9d9d9d;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+        td {
+            color: #d4d4d4;
+        }
+        tr:hover {
+            background-color: #363636;
+        }
+        .footer { 
+            text-align: center; 
+            margin-top: 40px; 
+            font-size: 0.85em; 
+            color: #6d6d6d; 
+            padding: 20px;
+            border-top: 1px solid #404040;
+        }
+        .report-date {
+            color: #9d9d9d;
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+        }
+        .financial-item {
+            background: rgba(78, 201, 176, 0.1);
+            border: 1px solid rgba(78, 201, 176, 0.2);
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin: 5px 0;
+            color: #4ec9b0;
+        }
+        .frequency-item {
+            background: rgba(244, 135, 113, 0.1);
+            border: 1px solid rgba(244, 135, 113, 0.2);
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin: 5px 0;
+            color: #f48771;
+        }
+        .section-icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Relatório Gerencial - Pro Combate</h1>
+        <p class="report-date">Data do Relatório: {{ data_relatorio|date:"d/m/Y" }}</p>
+
+        <div class="card">
+            <h3><span class="section-icon">📈</span> Análise Financeira</h3>
+            <p><strong>Período de Análise:</strong> {{ dados_financeiros.periodo }}</p>
+            <div class="financial-item">
+                <strong>Faturamento (Mês Passado):</strong> R$ {{ dados_financeiros.faturamento|floatformat:2 }}
+            </div>
+            <div class="financial-item">
+                <strong>Total de Inadimplência (Vencido):</strong> R$ {{ dados_financeiros.inadimplencia|floatformat:2 }}
+            </div>
+            <div class="financial-item">
+                <strong>Novas Assinaturas (Mês Passado):</strong> {{ dados_financeiros.novas_assinaturas }}
+            </div>
+        </div>
+
+        <div class="card">
+            <h3><span class="section-icon">📉</span> Alunos com Baixa Frequência (Risco de Evasão)</h3>
+            <p>Alunos com menos de 4 presenças nos últimos 30 dias.</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome do Aluno</th>
+                        <th>Presenças (30d)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for aluno in dados_frequencia %}
+                    <tr>
+                        <td>{{ aluno.nome_completo }}</td>
+                        <td>{{ aluno.num_presencas }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2">Nenhum aluno com baixa frequência detectado.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            Relatório gerado automaticamente pelo Sistema de Gestão de Lutas.
+        </div>
+    </div>
+</body>
+</html>

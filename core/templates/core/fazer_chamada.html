@@ -1,0 +1,71 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Chamada - {{ turma.modalidade.nome }}{% endblock %}
+
+{% block content %}
+<div class="section-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h3 class="section-title">
+                <i class="bi bi-check2-circle section-icon"></i>
+                Chamada - {{ turma.modalidade.nome }}
+            </h3>
+            <p class="section-subtitle">
+                <i class="bi bi-clock me-1"></i>
+                Horário: {{ turma.horario_inicio|time:"H:i" }} | Data: {{ data_hoje|date:"d/m/Y" }}
+            </p>
+        </div>
+        <a href="{% url 'pagina_presenca' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="futuristic-table-container">
+    {% for aluno in alunos_para_chamada %}
+    <div class="table-row d-flex justify-content-between align-items-center p-3">
+        <div class="d-flex align-items-center">
+            <div class="avatar-container me-3">
+                {% if aluno.foto %}
+                    <img src="{{ aluno.foto.url }}" class="student-avatar rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                {% else %}
+                    <div class="student-avatar-placeholder">
+                        <i class="bi bi-person"></i>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="student-info">
+                <div class="student-name">{{ aluno.nome_completo }}</div>
+                <div class="student-meta">
+                    <i class="bi bi-person-badge me-1"></i>
+                    Aluno ativo
+                </div>
+            </div>
+        </div>
+        <div>
+            {% if aluno.id in presentes_hoje_ids %}
+                <span class="status-badge status-success">
+                    <i class="bi bi-check-lg me-1"></i> Presente
+                </span>
+            {% else %}
+                <form action="{% url 'marcar_presenca' turma.pk aluno.pk %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>
+                        Marcar Presença
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="empty-state">
+        <i class="bi bi-people empty-state-icon"></i>
+        <h5>Nenhum Aluno Encontrado</h5>
+        <p>
+            Não há alunos ativos matriculados nesta turma no momento.
+        </p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,236 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ tipo }} Turma - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos para formulário de turma - Tema Dark */
+    .form-container {
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 8px;
+        box-shadow: var(--shadow-soft);
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-header {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-light);
+        border-radius: 8px 8px 0 0;
+        font-weight: 600;
+    }
+    
+    .quick-actions {
+        background: var(--bg-hover);
+        border: 1px solid var(--border-light);
+        border-radius: 6px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .quick-btn {
+        background: var(--bg-card) !important;
+        border: 1px solid var(--border-light) !important;
+        color: var(--text-secondary) !important;
+        border-radius: 6px !important;
+        font-weight: 500 !important;
+        transition: all 0.2s ease !important;
+    }
+    
+    .quick-btn:hover {
+        background: var(--accent-blue) !important;
+        border-color: var(--accent-blue) !important;
+        color: var(--bg-primary) !important;
+        transform: translateY(-1px);
+    }
+    
+    .schedule-form-row {
+        background: var(--bg-hover);
+        border: 1px solid var(--border-light);
+        border-radius: 6px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        transition: all 0.2s ease;
+    }
+    
+    .schedule-form-row:hover {
+        border-color: var(--accent-blue);
+    }
+    
+    .add-schedule-btn {
+        background: var(--accent-green) !important;
+        border-color: var(--accent-green) !important;
+        color: var(--bg-primary) !important;
+        border-radius: 6px !important;
+        font-weight: 500 !important;
+    }
+    
+    .add-schedule-btn:hover {
+        background: rgba(78, 201, 176, 0.8) !important;
+        border-color: rgba(78, 201, 176, 0.8) !important;
+        transform: translateY(-1px);
+    }
+    
+    .action-buttons {
+        background: var(--bg-hover);
+        border-top: 1px solid var(--border-light);
+        padding: 1.5rem;
+        border-radius: 0 0 8px 8px;
+    }
+    
+    .btn-save {
+        background: var(--accent-green) !important;
+        border-color: var(--accent-green) !important;
+        color: var(--bg-primary) !important;
+        padding: 0.75rem 2rem !important;
+        font-weight: 600 !important;
+        border-radius: 6px !important;
+    }
+    
+    .btn-save:hover {
+        background: rgba(78, 201, 176, 0.8) !important;
+        border-color: rgba(78, 201, 176, 0.8) !important;
+        transform: translateY(-1px);
+    }
+    
+    .btn-cancel {
+        background: var(--bg-card) !important;
+        border: 1px solid var(--border-light) !important;
+        color: var(--text-secondary) !important;
+        padding: 0.75rem 2rem !important;
+        font-weight: 500 !important;
+        border-radius: 6px !important;
+    }
+    
+    .btn-cancel:hover {
+        background: var(--bg-hover) !important;
+        border-color: var(--border-medium) !important;
+        color: var(--text-primary) !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-container">
+                <div class="form-header">
+                    <i class="bi bi-people me-2" style="color: var(--accent-blue);"></i>
+                    Dados da Turma
+                </div>
+                <div class="card-body">
+                    {{ form|crispy }}
+                    
+                    <div class="quick-actions">
+                        <label class="form-label fw-bold" style="color: var(--text-secondary);">
+                            <i class="bi bi-lightning me-1" style="color: var(--accent-yellow);"></i>
+                            Gerenciamento Rápido de Alunos:
+                        </label><br>
+                        <button type="button" id="select-all-btn" class="btn quick-btn me-2">
+                            <i class="bi bi-check-square me-1"></i> Marcar Todos
+                        </button>
+                        <button type="button" id="deselect-all-btn" class="btn quick-btn">
+                            <i class="bi bi-x-square me-1"></i> Desmarcar Todos
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-container">
+                <div class="form-header">
+                    <i class="bi bi-clock me-2" style="color: var(--accent-green);"></i>
+                    Horários da Turma
+                </div>
+                <div class="card-body">
+                    {{ formset.management_form|crispy }}
+                    
+                    <div id="horarios-container">
+                        {% for horario_form in formset %}
+                            <div class="schedule-form-row row align-items-center">
+                                <div class="col-auto" style="display:none;">{{ horario_form.id }}</div>
+                                <div class="col-md-5">{{ horario_form.dias_semana }}</div>
+                                <div class="col-md-3">{{ horario_form.horario_inicio }}</div>
+                                <div class="col-md-3">{{ horario_form.horario_fim }}</div>
+                                <div class="col-md-1">
+                                    {% if horario_form.instance.pk %}
+                                        {{ horario_form.DELETE }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" id="add-horario-form" class="btn add-schedule-btn mt-2">
+                        <i class="bi bi-plus-circle me-1"></i> Adicionar Outro Horário
+                    </button>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button type="submit" class="btn btn-save me-3">
+                    <i class="bi bi-check-lg me-1"></i> Salvar Alterações
+                </button>
+                <a href="{% url 'dashboard' %}" class="btn btn-cancel">
+                    <i class="bi bi-x-lg me-1"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="empty-form-template" style="display: none;">
+    <div class="schedule-form-row row align-items-center">
+        <div class="col-auto" style="display:none;">{{ formset.empty_form.id }}</div>
+        <div class="col-md-5">{{ formset.empty_form.dias_semana }}</div>
+        <div class="col-md-3">{{ formset.empty_form.horario_inicio }}</div>
+        <div class="col-md-3">{{ formset.empty_form.horario_fim }}</div>
+        <div class="col-md-1">
+            {% if formset.empty_form.instance.pk %}
+                {{ formset.empty_form.DELETE }}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+// Garante que o script só roda depois que a página (e o jQuery) carregou
+$(document).ready(function() {
+    
+    // --- Lógica para os botões Marcar/Desmarcar Todos os Alunos ---
+    $('#select-all-btn').on('click', function() {
+        $("#id_alunos > option").prop("selected", "selected").trigger("change");
+    });
+
+    $('#deselect-all-btn').on('click', function() {
+        $("#id_alunos > option").prop("selected", false).trigger("change");
+    });
+
+    // --- Lógica para adicionar novos formulários de horário (Formset) ---
+    $('#add-horario-form').on('click', function() {
+        // Pega o número total de formulários atual do campo oculto do management_form
+        const totalFormsInput = document.getElementById('id_horarios-TOTAL_FORMS');
+        let formIdx = parseInt(totalFormsInput.value);
+
+        // Pega o HTML do template do formulário em branco
+        const emptyFormHtml = document.getElementById('empty-form-template').innerHTML;
+        
+        // Substitui o prefixo padrão '__prefix__' pelo índice correto do novo formulário
+        const newFormHtml = emptyFormHtml.replace(/__prefix__/g, formIdx);
+
+        // Insere o novo formulário no container
+        $('#horarios-container').append(newFormHtml);
+        
+        // Incrementa o contador total de formulários no campo oculto
+        totalFormsInput.value = formIdx + 1;
+    });
+});
+</script>
+{% endblock %}

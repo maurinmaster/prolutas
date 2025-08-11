@@ -1,0 +1,189 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Financeiro - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-cash-coin"></i> Controle Financeiro por Assinaturas</h2>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Aluno</th>
+                        <th>Assinatura Ativa</th>
+                        <th>Status</th>
+                        <th>Faturas Pendentes</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for aluno in alunos_list %}
+                    <tr>
+                        <td>
+                            {% if aluno.foto %}
+                                <img src="{{ aluno.foto.url }}" class="rounded-circle me-2" style="width: 35px; height: 35px; object-fit: cover;">
+                            {% endif %}
+                            {{ aluno.nome_completo }}
+                        </td>
+
+                        <td>
+                            {% if aluno.assinatura_ativa %}
+                                <strong>{{ aluno.assinatura_ativa.plano.nome }}</strong><br>
+                                <small class="text-muted">Desde: {{ aluno.assinatura_ativa.data_inicio|date:"d/m/Y" }}</small>
+                            {% else %}
+                                <span class="text-muted">Nenhuma assinatura ativa</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if aluno.status_financeiro == "Vencida" %}
+                                <span class="badge bg-danger">Vencida</span>
+                            {% elif aluno.status_financeiro == "Pendente" %}
+                                <span class="badge bg-warning text-dark">Pendente</span>
+                            {% elif aluno.status_financeiro == "Em Dia" %}
+                                <span class="badge bg-success">Em Dia</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Sem Plano</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% for fatura in aluno.faturas_pendentes %}
+                                <div class="mb-1">
+                                    <small>Venc: {{ fatura.data_vencimento|date:"d/m/Y" }} - R$ {{ fatura.valor }}</small>
+                                    <div class="btn-group btn-group-sm ms-2" role="group">
+                                        <button class="btn btn-outline-success py-0 px-1" data-bs-toggle="modal" data-bs-target="#registrarPagamentoModal" data-url="{% url 'registrar_pagamento' fatura.pk %}" data-aluno="{{ aluno.nome_completo }}" data-valor="{{ fatura.valor }}" data-vencimento="{{ fatura.data_vencimento|date:'d/m/Y' }}">
+                                            Pagar
+                                        </button>
+                                        <button class="btn btn-outline-secondary py-0 px-1" data-bs-toggle="modal" data-bs-target="#alterarVencimentoModal" data-url="{% url 'alterar_vencimento_fatura' fatura.pk %}" data-vencimento-atual="{{ fatura.data_vencimento|date:'Y-m-d' }}">
+                                            Alterar Venc.
+                                        </button>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                {% if aluno.assinatura_ativa %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                        
+                        <td>
+                            {% if not aluno.assinatura_ativa %}
+                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#criarAssinaturaModal" data-url="{% url 'criar_assinatura' aluno.pk %}" data-aluno="{{ aluno.nome_completo }}">
+                                    Criar Assinatura
+                                </button>
+                            {% else %}
+                                <form action="{% url 'cancelar_assinatura' aluno.assinatura_ativa.pk %}" method="post" onsubmit="return confirm('Tem certeza que deseja cancelar esta assinatura? As faturas existentes não serão removidas.');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        Cancelar Assinatura
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center">Nenhum aluno ativo cadastrado.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="criarAssinaturaModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Criar Assinatura para <strong id="alunoNomeAssinatura"></strong></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <form id="criarAssinaturaForm" method="post">
+                    {% csrf_token %}
+                    {{ assinatura_form|crispy }}
+                    <div class="d-grid mt-3"><button type="submit" class="btn btn-primary">Criar Assinatura</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="registrarPagamentoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Registrar Pagamento de <strong id="alunoNomePagar"></strong></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <p><strong>Valor:</strong> R$ <span id="valorPagar"></span><br><strong>Vencimento:</strong> <span id="vencimentoPagar"></span></p><hr>
+                <form id="registrarPagamentoForm" method="post">
+                    {% csrf_token %}
+                    {{ pagamento_form|crispy }}
+                    <div class="d-grid mt-3"><button type="submit" class="btn btn-success">Confirmar Pagamento</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="alterarVencimentoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Alterar Vencimento</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <form id="alterarVencimentoForm" method="post">
+                    {% csrf_token %}
+                    {{ alterar_vencimento_form|crispy }}
+                    <div class="d-grid mt-3"><button type="submit" class="btn btn-primary">Salvar Nova Data</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Script para o Modal de Criar Assinatura
+    $('#criarAssinaturaModal').on('show.bs.modal', function (event) {
+        const button = $(event.relatedTarget);
+        const alunoNome = button.data('aluno');
+        const formUrl = button.data('url');
+        
+        const modal = $(this);
+        modal.find('#alunoNomeAssinatura').text(alunoNome);
+        modal.find('#criarAssinaturaForm').attr('action', formUrl);
+    });
+
+    // Script para o Modal de Registrar Pagamento
+    $('#registrarPagamentoModal').on('show.bs.modal', function (event) {
+        const button = $(event.relatedTarget);
+        const alunoNome = button.data('aluno');
+        const valor = button.data('valor');
+        const vencimento = button.data('vencimento');
+        const formUrl = button.data('url');
+        
+        const modal = $(this);
+        modal.find('#alunoNomePagar').text(alunoNome);
+        modal.find('#valorPagar').text(valor);
+        modal.find('#vencimentoPagar').text(vencimento);
+        modal.find('#registrarPagamentoForm').attr('action', formUrl);
+    });
+
+    // Script para o Modal de Alterar Vencimento
+    $('#alterarVencimentoModal').on('show.bs.modal', function (event) {
+        const button = $(event.relatedTarget);
+        const formUrl = button.data('url');
+        const vencimentoAtual = button.data('vencimento-atual');
+        
+        const modal = $(this);
+        modal.find('#alterarVencimentoForm').attr('action', formUrl);
+        // Pré-preenche o campo de data com o vencimento atual
+        modal.find('#id_data_vencimento').val(vencimentoAtual);
+    });
+});
+</script>
+{% endblock %}

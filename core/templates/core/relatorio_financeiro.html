@@ -1,0 +1,71 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Relatório Financeiro - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-bar-chart-line-fill"></i> Relatório Financeiro</h2>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-3"><label for="id_data_inicio" class="form-label">De:</label><input type="date" name="data_inicio" class="form-control" id="id_data_inicio" value="{{ filtros_aplicados.data_inicio }}"></div>
+            <div class="col-md-3"><label for="id_data_fim" class="form-label">Até:</label><input type="date" name="data_fim" class="form-control" id="id_data_fim" value="{{ filtros_aplicados.data_fim }}"></div>
+            <div class="col-md-2">
+                <label for="id_status" class="form-label">Status</label>
+                <select name="status" class="form-select" id="id_status">
+                    <option value="">Todos</option>
+                    <option value="paga" {% if filtros_aplicados.status == 'paga' %}selected{% endif %}>Pagas</option>
+                    <option value="pendente" {% if filtros_aplicados.status == 'pendente' %}selected{% endif %}>Pendentes</option>
+                    <option value="vencida" {% if filtros_aplicados.status == 'vencida' %}selected{% endif %}>Vencidas</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="id_plano" class="form-label">Plano</label>
+                <select name="plano" class="form-select" id="id_plano">
+                    <option value="">Todos</option>
+                    {% for plano in planos_para_filtro %}
+                    <option value="{{ plano.pk }}" {% if filtros_aplicados.plano_id == plano.pk|stringformat:"s" %}selected{% endif %}>{{ plano.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1 d-grid"><button type="submit" class="btn btn-primary">Filtrar</button></div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4"><div class="card shadow-sm text-center"><div class="card-body"><h6 class="card-subtitle text-muted">Total Recebido no Período</h6><p class="card-text fs-4 fw-bold text-success">R$ {{ kpis.total_recebido|floatformat:2 }}</p></div></div></div>
+    <div class="col-md-4"><div class="card shadow-sm text-center"><div class="card-body"><h6 class="card-subtitle text-muted">Total a Receber no Período</h6><p class="card-text fs-4 fw-bold text-warning">R$ {{ kpis.total_a_receber|floatformat:2 }}</p></div></div></div>
+    <div class="col-md-4"><div class="card shadow-sm text-center"><div class="card-body"><h6 class="card-subtitle text-muted">Total Geral no Período</h6><p class="card-text fs-4 fw-bold">R$ {{ kpis.total_geral|floatformat:2 }}</p></div></div></div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle">
+                <thead><tr><th>Aluno</th><th>Plano</th><th>Vencimento</th><th>Pagamento</th><th>Valor</th><th>Status</th></tr></thead>
+                <tbody>
+                    {% for fatura in faturas %}
+                    <tr>
+                        <td>{{ fatura.assinatura.aluno.nome_completo }}</td>
+                        <td>{{ fatura.assinatura.plano.nome }}</td>
+                        <td>{{ fatura.data_vencimento|date:"d/m/Y" }}</td>
+                        <td>{{ fatura.data_pagamento|date:"d/m/Y"|default:"-" }}</td>
+                        <td>R$ {{ fatura.valor|floatformat:2 }}</td>
+                        <td>
+                            {% if fatura.status == "Paga" %}<span class="badge bg-success">Paga</span>
+                            {% elif fatura.status == "Vencida" %}<span class="badge bg-danger">Vencida</span>
+                            {% else %}<span class="badge bg-warning text-dark">Pendente</span>{% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" class="text-center p-4">Nenhuma fatura encontrada para os filtros selecionados.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

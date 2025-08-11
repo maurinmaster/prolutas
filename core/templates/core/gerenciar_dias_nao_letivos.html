@@ -1,0 +1,46 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Dias Não Letivos - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h4>Adicionar Dia Não Letivo</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="d-grid mt-3">
+                        <button type="submit" class="btn btn-primary">Adicionar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <h4>Dias já Cadastrados</h4>
+        <div class="list-group">
+            {% for dia in dias_cadastrados %}
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                <span>
+                    <strong>{{ dia.data|date:"d/m/Y" }}</strong> - {{ dia.descricao }}
+                </span>
+                <form action="{% url 'deletar_dia_nao_letivo' dia.pk %}" method="post" onsubmit="return confirm('Tem certeza que deseja excluir este dia?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </form>
+            </div>
+            {% empty %}
+            <div class="list-group-item">Nenhum dia não letivo cadastrado.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

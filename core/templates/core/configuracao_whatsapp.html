@@ -1,0 +1,30 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Configurações do WhatsApp - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h4><i class="bi bi-whatsapp"></i> Configurações de Notificação via WhatsApp</h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">
+                    Configure o número de telefone que será usado para enviar as mensagens e ative
+                    ou desative os tipos de notificações automáticas.
+                </p>
+                <hr>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

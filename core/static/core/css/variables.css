@@ -1,0 +1,229 @@
+/* =====================================================
+   VARIÁVEIS CSS - SISTEMA PRO-LUTAS
+   ===================================================== */
+
+/* Variáveis Base para ambos os temas */
+:root {
+    /* Layout */
+    --sidebar-width: 280px;
+    
+    /* Shadows */
+    --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 8px 24px rgba(0, 0, 0, 0.15);
+    --shadow-strong: 0 16px 48px rgba(0, 0, 0, 0.2);
+    
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-medium: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    
+    /* Border Radius */
+    --border-radius-sm: 4px;
+    --border-radius-md: 6px;
+    --border-radius-lg: 8px;
+    --border-radius-xl: 12px;
+    
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-xxl: 3rem;
+    
+    /* Font Weights */
+    --fw-light: 300;
+    --fw-normal: 400;
+    --fw-medium: 500;
+    --fw-semibold: 600;
+    --fw-bold: 700;
+    
+    /* Font Sizes */
+    --fs-xs: 0.75rem;
+    --fs-sm: 0.875rem;
+    --fs-md: 1rem;
+    --fs-lg: 1.125rem;
+    --fs-xl: 1.25rem;
+    --fs-xxl: 1.5rem;
+    --fs-xxxl: 2rem;
+}
+
+/* Tema Light (padrão) - Inverso completo do Dark */
+:root {
+    --theme-name: 'light';
+    
+    /* Backgrounds Light - Inverso do Dark */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #e9ecef;
+    --bg-card: #ffffff;
+    --bg-hover: #f5f5f5;
+    --bg-sidebar: #ffffff;
+    
+    /* Text Colors Light - Inverso do Dark */
+    --text-primary: #212529;
+    --text-secondary: #495057;
+    --text-muted: #6c757d;
+    --text-inverse: #ffffff;
+    
+    /* Accent Colors Light - Mais vibrantes para contrastar com fundo branco */
+    --accent-blue: #0066cc;
+    --accent-green: #28a745;
+    --accent-orange: #fd7e14;
+    --accent-yellow: #ffc107;
+    --accent-red: #dc3545;
+    --accent-purple: #6f42c1;
+    
+    /* Border Colors Light */
+    --border-light: #dee2e6;
+    --border-medium: #ced4da;
+    --border-dark: #adb5bd;
+    
+    /* Status Colors Light */
+    --success-bg: rgba(40, 167, 69, 0.1);
+    --success-color: #28a745;
+    --success-border: rgba(40, 167, 69, 0.25);
+    
+    --danger-bg: rgba(220, 53, 69, 0.1);
+    --danger-color: #dc3545;
+    --danger-border: rgba(220, 53, 69, 0.25);
+    
+    --warning-bg: rgba(255, 193, 7, 0.1);
+    --warning-color: #856404;
+    --warning-border: rgba(255, 193, 7, 0.25);
+    
+    --info-bg: rgba(0, 102, 204, 0.1);
+    --info-color: #0066cc;
+    --info-border: rgba(0, 102, 204, 0.25);
+    
+    /* Sidebar específico para tema light */
+    --sidebar-bg: #ffffff;
+    --sidebar-text: #495057;
+    --sidebar-text-hover: #212529;
+    --sidebar-bg-hover: #f8f9fa;
+    --sidebar-border: #dee2e6;
+    
+    /* Shadow para tema light */
+    --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --shadow-medium: 0 8px 24px rgba(0, 0, 0, 0.2);
+    --shadow-strong: 0 16px 48px rgba(0, 0, 0, 0.25);
+}
+
+/* Tema Dark - aplicado via classe .theme-dark no body */
+body.theme-dark,
+html.theme-dark,
+.theme-dark {
+    --theme-name: 'dark';
+    
+    /* Backgrounds Dark */
+    --bg-primary: #1e1e1e;
+    --bg-secondary: #252525;
+    --bg-tertiary: #2d2d2d;
+    --bg-card: #2b2b2b;
+    --bg-hover: #363636;
+    --bg-sidebar: #252525;
+    
+    /* Text Colors Dark */
+    --text-primary: #d4d4d4;
+    --text-secondary: #9d9d9d;
+    --text-muted: #6d6d6d;
+    --text-inverse: #1e1e1e;
+    
+    /* Accent Colors Dark (IDLE Style) */
+    --accent-blue: #569cd6;
+    --accent-green: #4ec9b0;
+    --accent-orange: #ce9178;
+    --accent-yellow: #dcdcaa;
+    --accent-red: #f48771;
+    --accent-purple: #c586c0;
+    
+    /* Border Colors Dark */
+    --border-light: #404040;
+    --border-medium: #505050;
+    --border-dark: #3c3c3c;
+    
+    /* Status Colors Dark */
+    --success-bg: rgba(78, 201, 176, 0.15);
+    --success-color: #4ec9b0;
+    --success-border: rgba(78, 201, 176, 0.3);
+    
+    --danger-bg: rgba(244, 135, 113, 0.15);
+    --danger-color: #f48771;
+    --danger-border: rgba(244, 135, 113, 0.3);
+    
+    --warning-bg: rgba(206, 145, 120, 0.15);
+    --warning-color: #ce9178;
+    --warning-border: rgba(206, 145, 120, 0.3);
+    
+    --info-bg: rgba(86, 156, 214, 0.15);
+    --info-color: #569cd6;
+    --info-border: rgba(86, 156, 214, 0.3);
+    
+    /* Sidebar específico para tema dark */
+    --sidebar-bg: #252525;
+    --sidebar-text: #9d9d9d;
+    --sidebar-text-hover: #d4d4d4;
+    --sidebar-bg-hover: #363636;
+    --sidebar-border: #404040;
+    
+    /* Shadow para tema dark */
+    --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --shadow-medium: 0 8px 24px rgba(0, 0, 0, 0.4);
+    --shadow-strong: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+/* Media Query para tema escuro automático (opcional) */
+@media (prefers-color-scheme: dark) {
+    :root:not(.theme-light) {
+        --theme-name: 'dark';
+        
+        --bg-primary: #1e1e1e;
+        --bg-secondary: #252525;
+        --bg-tertiary: #2d2d2d;
+        --bg-card: #2b2b2b;
+        --bg-hover: #363636;
+        --bg-sidebar: #252525;
+        
+        --text-primary: #d4d4d4;
+        --text-secondary: #9d9d9d;
+        --text-muted: #6d6d6d;
+        --text-inverse: #1e1e1e;
+        
+        --accent-blue: #569cd6;
+        --accent-green: #4ec9b0;
+        --accent-orange: #ce9178;
+        --accent-yellow: #dcdcaa;
+        --accent-red: #f48771;
+        --accent-purple: #c586c0;
+        
+        --border-light: #404040;
+        --border-medium: #505050;
+        --border-dark: #3c3c3c;
+        
+        --success-bg: rgba(78, 201, 176, 0.15);
+        --success-color: #4ec9b0;
+        --success-border: rgba(78, 201, 176, 0.3);
+        
+        --danger-bg: rgba(244, 135, 113, 0.15);
+        --danger-color: #f48771;
+        --danger-border: rgba(244, 135, 113, 0.3);
+        
+        --warning-bg: rgba(206, 145, 120, 0.15);
+        --warning-color: #ce9178;
+        --warning-border: rgba(206, 145, 120, 0.3);
+        
+        --info-bg: rgba(86, 156, 214, 0.15);
+        --info-color: #569cd6;
+        --info-border: rgba(86, 156, 214, 0.3);
+        
+        --sidebar-bg: #252525;
+        --sidebar-text: #9d9d9d;
+        --sidebar-text-hover: #d4d4d4;
+        --sidebar-bg-hover: #363636;
+        --sidebar-border: #404040;
+        
+        --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.3);
+        --shadow-medium: 0 8px 24px rgba(0, 0, 0, 0.4);
+        --shadow-strong: 0 16px 48px rgba(0, 0, 0, 0.5);
+    }
+}

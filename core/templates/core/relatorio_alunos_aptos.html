@@ -1,0 +1,101 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Alunos Aptos para Exame - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="section-header">
+    <h2 class="section-title">
+        <i class="bi bi-person-check-fill section-icon" style="color: var(--accent-green);"></i>
+        Relatório de Alunos Aptos para Graduação
+    </h2>
+    <p class="section-subtitle">
+        <i class="bi bi-info-circle me-1"></i>
+        Controle de aptidão para exames de graduação por tempo de permanência
+    </p>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="alert alert-info">
+            <i class="bi bi-clock-history me-2"></i>
+            <strong>Sobre este relatório:</strong> Esta lista mostra os alunos que já cumpriram o tempo mínimo de permanência em suas graduações atuais. A lista está ordenada por quem está apto há mais tempo, facilitando a identificação de prioridades para próximos exames.
+        </div>
+        
+        <div class="futuristic-table-container">
+            <div class="table-responsive">
+                <table class="table futuristic-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Aluno</th>
+                            <th>Modalidade</th>
+                            <th>Graduação Atual</th>
+                            <th>Tempo de Aptidão</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for aluno in alunos_aptos %}
+                        <tr class="table-row">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-container me-3">
+                                        {% if aluno.foto %}
+                                            <img src="{{ aluno.foto.url }}" class="student-avatar rounded-circle" style="object-fit: cover;">
+                                        {% else %}
+                                            <div class="student-avatar-placeholder">
+                                                <i class="bi bi-person"></i>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="student-info">
+                                        <div class="student-name">{{ aluno.nome_completo }}</div>
+                                        <div class="student-meta">
+                                            <i class="bi bi-person-badge me-1"></i>
+                                            Aluno ativo
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="fw-medium">{{ aluno.graduacao_atual.modalidade.nome }}</span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if aluno.graduacao_atual.icone_arquivo %}
+                                        {% load static %}
+                                        <img src="{% static 'core/img/graduacoes/'|add:aluno.graduacao_atual.icone_arquivo %}" 
+                                             alt="{{ aluno.graduacao_atual.nome }}" width="20" class="me-2">
+                                    {% else %}
+                                        <i class="bi bi-award me-2 text-warning"></i>
+                                    {% endif %}
+                                    {{ aluno.graduacao_atual.nome }}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-badge status-success">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    Apto há {{ aluno.dias_apto }} dias
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="p-0">
+                                <div class="empty-state">
+                                    <i class="bi bi-calendar-x empty-state-icon"></i>
+                                    <h5>Nenhum Aluno Apto Encontrado</h5>
+                                    <p>
+                                        Nenhum aluno ativo cumpre os requisitos de tempo no momento.
+                                        <br>
+                                        <small>Verifique novamente em alguns dias.</small>
+                                    </p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}Gerenciar Graduações - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-md-5 col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h4><i class="bi bi-award-fill"></i> Adicionar Graduação</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="d-grid mt-3">
+                        <button type="submit" class="btn btn-primary">Adicionar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7 col-lg-8">
+        <h4>Graduações Cadastradas</h4>
+        <div class="list-group">
+            {% for item in graduacoes %}
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    {% if item.icone_arquivo %}
+                        <img src="{% static 'core/img/graduacoes/'|add:item.icone_arquivo %}" alt="{{ item.nome }}" width="24" class="me-2">
+                    {% else %}
+                        <i class="bi bi-award me-2"></i>
+                    {% endif %}
+                    <strong>{{ item.modalidade.nome }}</strong>: {{ item.nome }}
+                    <br>
+                    <small class="text-muted">
+                        Ordem: {{ item.ordem }} | Tempo Mín.: {{ item.tempo_minimo_meses }} meses
+                    </small>
+                </div>
+
+                <div class="btn-group" role="group">
+                    <a href="{% url 'graduacao_edit' item.pk %}" class="btn btn-sm btn-outline-warning" title="Editar">
+                        <i class="bi bi-pencil-fill"></i>
+                    </a>
+                    <form action="{% url 'deletar_graduacao' item.pk %}" method="post" onsubmit="return confirm('Tem certeza que deseja excluir esta graduação?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir"><i class="bi bi-trash"></i></button>
+                    </form>
+                </div>
+
+            </div>
+            {% empty %}
+            <div class="list-group-item">
+                Nenhuma graduação cadastrada.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
