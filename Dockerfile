@@ -2,8 +2,8 @@
 FROM python:3.12-slim
 
 # Define variáveis de ambiente
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # Cria e define o diretório de trabalho dentro do contêiner
 WORKDIR /app
