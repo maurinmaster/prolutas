@@ -4,7 +4,6 @@ from django.db import transaction, models
 from django.forms import inlineformset_factory
 from datetime import date, timedelta, datetime
 import os
-import google.generativeai as genai
 from django.contrib import messages
 from django.db.models import Count, Q, Sum
 from dateutil.relativedelta import relativedelta
@@ -591,13 +590,22 @@ Atenciosamente,
                 resposta_ia = response['output']
                 #... (atualiza histórico, etc.)
 
-            # --- GERAÇÃO DA RESPOSTA COM GEMINI ---
+            # --- GERAÇÃO DA RESPOSTA COM LANGCHAIN ---
             if pergunta == '__INITIAL_SUMMARY__':
                 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-                genai.configure(api_key=GEMINI_API_KEY)
-                model = genai.GenerativeModel('gemini-1.5-flash')
-                response = model.generate_content(prompt)
-                resposta_ia = response.text
+                if GEMINI_API_KEY:
+                    try:
+                        model = ChatGoogleGenerativeAI(
+                            model="gemini-1.5-flash",
+                            google_api_key=GEMINI_API_KEY,
+                            temperature=0.7
+                        )
+                        response = model.invoke([HumanMessage(content=prompt)])
+                        resposta_ia = response.content
+                    except Exception as e:
+                        resposta_ia = f"Erro ao processar com IA: {str(e)}"
+                else:
+                    resposta_ia = "API Key do Gemini não configurada."
 
             # Define as sugestões de menu para o frontend
             sugestoes = [
