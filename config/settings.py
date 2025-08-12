@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-9n@p_$d8qd@y(lys@u5el%b%aah7fzv=k9=9n_e1sa*b_+jvme
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['gestor.prolutas.com', 'localhost', '127.0.0.1']
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CSRF_TRUSTED_ORIGINS = ['https://gestor.prolutas.com', 'http://gestor.prolutas.com']
 
