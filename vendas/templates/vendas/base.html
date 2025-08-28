@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ config.titulo_site }}{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: {{ config.cor_primaria|default:"#007bff" }};
+            --secondary-color: {{ config.cor_secundaria|default:"#6c757d" }};
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+            background-color: #ffffff;
+        }
+        
+        /* Header */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), #0056b3);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white !important;
+        }
+        
+        .navbar-nav .nav-link {
+            color: rgba(255,255,255,0.9) !important;
+            font-weight: 500;
+            margin: 0 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-nav .nav-link:hover {
+            color: white !important;
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), #0056b3);
+            border: none;
+            border-radius: 25px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,123,255,0.4);
+        }
+        
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="white" opacity="0.1"><polygon points="0,100 1000,0 1000,100"/></svg>');
+            background-size: cover;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), #0056b3);
+            color: white;
+            border: none;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        /* Pricing Cards */
+        .pricing-card {
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .pricing-card.featured {
+            border-color: var(--primary-color);
+            transform: scale(1.05);
+        }
+        
+        .pricing-card.featured .card-header {
+            background: linear-gradient(135deg, var(--primary-color), #0056b3);
+        }
+        
+        /* Features */
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            border-radius: 10px;
+            background: var(--light-color);
+            transition: all 0.3s ease;
+        }
+        
+        .feature-item:hover {
+            background: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-color), #0056b3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        /* Footer */
+        .footer {
+            background: var(--dark-color);
+            color: white;
+            padding: 3rem 0 1rem;
+        }
+        
+        .footer h5 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .footer a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer a:hover {
+            color: var(--primary-color);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .pricing-card.featured {
+                transform: none;
+            }
+        }
+        
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #1a1a1a;
+                color: #ffffff;
+            }
+            
+            .card {
+                background-color: #2d2d2d;
+                color: #ffffff;
+            }
+            
+            .feature-item {
+                background-color: #2d2d2d;
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'vendas:pagina_inicial' %}">
+                <i class="bi bi-shield-check me-2"></i>
+                {{ config.titulo_site|default:"Gestão de Lutas" }}
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'vendas:pagina_inicial' %}">Início</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'vendas:planos_precos' %}">Planos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'vendas:sobre' %}">Sobre</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'vendas:contato' %}">Contato</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-outline-light ms-2" href="{% url 'login' %}">Entrar</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main style="margin-top: 80px;">
+        {% if messages %}
+            <div class="container mt-3">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h5><i class="bi bi-shield-check me-2"></i>{{ config.titulo_site|default:"Gestão de Lutas" }}</h5>
+                    <p class="text-muted">{{ config.subtitulo_site|default:"Sistema completo para gestão de academias de artes marciais" }}</p>
+                    <div class="social-links">
+                        {% if config.facebook_url %}
+                            <a href="{{ config.facebook_url }}" class="me-3"><i class="bi bi-facebook"></i></a>
+                        {% endif %}
+                        {% if config.instagram_url %}
+                            <a href="{{ config.instagram_url }}" class="me-3"><i class="bi bi-instagram"></i></a>
+                        {% endif %}
+                        {% if config.linkedin_url %}
+                            <a href="{{ config.linkedin_url }}"><i class="bi bi-linkedin"></i></a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-2 mb-4">
+                    <h5>Produto</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'vendas:planos_precos' %}">Planos</a></li>
+                        <li><a href="{% url 'vendas:sobre' %}">Sobre</a></li>
+                        <li><a href="{% url 'vendas:contato' %}">Contato</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-md-2 mb-4">
+                    <h5>Suporte</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'vendas:contato' %}">Central de Ajuda</a></li>
+                        <li><a href="{% url 'vendas:contato' %}">Documentação</a></li>
+                        <li><a href="{% url 'vendas:contato' %}">Status</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-md-2 mb-4">
+                    <h5>Legal</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'vendas:politica_privacidade' %}">Privacidade</a></li>
+                        <li><a href="{% url 'vendas:termos_uso' %}">Termos de Uso</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-md-2 mb-4">
+                    <h5>Contato</h5>
+                    <ul class="list-unstyled">
+                        {% if config.email_contato %}
+                            <li><a href="mailto:{{ config.email_contato }}">{{ config.email_contato }}</a></li>
+                        {% endif %}
+                        {% if config.telefone_contato %}
+                            <li><a href="tel:{{ config.telefone_contato }}">{{ config.telefone_contato }}</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            
+            <hr class="my-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="text-muted mb-0">&copy; 2024 {{ config.titulo_site|default:"Gestão de Lutas" }}. Todos os direitos reservados.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="text-muted mb-0">Feito com <i class="bi bi-heart-fill text-danger"></i> no Brasil</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Stripe JS -->
+    <script src="https://js.stripe.com/v3/"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

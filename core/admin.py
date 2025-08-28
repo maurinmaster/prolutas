@@ -80,3 +80,8 @@ class PresencaAdmin(admin.ModelAdmin):
     list_display = ('aluno', 'data', 'turma')
     list_filter = ('turma', 'data', 'academia')
     search_fields = ('aluno__nome_completo',)
+
+
+
+
+

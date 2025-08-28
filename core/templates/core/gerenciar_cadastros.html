@@ -22,7 +22,7 @@
             {% for item in modalidades %}
             <div class="list-group-item d-flex justify-content-between align-items-center">
                 {{ item.nome }}
-                <form action="{% url 'deletar_modalidade' item.pk %}" method="post" onsubmit="return confirm('Tem certeza que deseja excluir &quot;{{ item.nome }}&quot;?');">
+                <form action="{% url 'deletar_modalidade' academia.slug item.pk %}" method="post" onsubmit="return confirm('Tem certeza que deseja excluir &quot;{{ item.nome }}&quot;?');">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir"><i class="bi bi-trash"></i></button>
                 </form>
@@ -50,7 +50,7 @@
             {% for item in professores %}
             <div class="list-group-item d-flex justify-content-between align-items-center">
                 {{ item.nome_completo }}
-                <form action="{% url 'deletar_professor' item.pk %}" method="post" onsubmit="return confirm('Tem certeza que deseja excluir &quot;{{ item.nome_completo }}&quot;?');">
+                <form action="{% url 'deletar_professor' academia.slug item.pk %}" method="post" onsubmit="return confirm('Tem certeza que deseja excluir &quot;{{ item.nome_completo }}&quot;?');">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir"><i class="bi bi-trash"></i></button>
                 </form>

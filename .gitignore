@@ -17,8 +17,7 @@ db.sqlite3
 .env
 *.env
 
-# Arquivos Estáticos e de Mídia Gerados pelo Django
-staticfiles/
+# Arquivos de Mídia Gerados pelo Django
 media/
 
 # Arquivos de IDEs e Editores
@@ -32,3 +31,7 @@ logs/
 
 # Dependências do Node.js
 /whatsapp_gateway/node_modules
+
+# Arquivos de Cache e Sessão do WhatsApp
+whatsapp_gateway/.wwebjs_auth/
+whatsapp_gateway/.wwebjs_cache/

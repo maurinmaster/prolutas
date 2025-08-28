@@ -1,0 +1,242 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Admin - ProLutas SaaS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+.border-left-primary {
+    border-left: 0.25rem solid #4e73df !important;
+}
+.border-left-success {
+    border-left: 0.25rem solid #1cc88a !important;
+}
+.border-left-info {
+    border-left: 0.25rem solid #36b9cc !important;
+}
+.border-left-warning {
+    border-left: 0.25rem solid #f6c23e !important;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 text-primary">Dashboard Administrativo</h1>
+                <div class="btn-group">
+                    <a href="{% url 'admin_academias' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-building me-2"></i>Academias
+                    </a>
+                    <a href="{% url 'admin_planos' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-tags me-2"></i>Planos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cards de Estatísticas -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row g-0 align-items-center">
+                        <div class="col me-2">
+                            <div class="small fw-bold text-primary text-uppercase mb-1">
+                                Total de Academias
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-dark">{{ stats.total_academias }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-building fa-2x text-muted"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row g-0 align-items-center">
+                        <div class="col me-2">
+                            <div class="small fw-bold text-success text-uppercase mb-1">
+                                Academias Ativas
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-dark">{{ stats.academias_ativas }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-muted"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row g-0 align-items-center">
+                        <div class="col me-2">
+                            <div class="small fw-bold text-info text-uppercase mb-1">
+                                Receita Mensal
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-dark">R$ {{ stats.receita_mensal|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-muted"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row g-0 align-items-center">
+                        <div class="col me-2">
+                            <div class="small fw-bold text-warning text-uppercase mb-1">
+                                Em Trial
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-dark">{{ stats.academias_trial }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-muted"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gráficos e Tabelas -->
+    <div class="row">
+        <!-- Academias Recentes -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 fw-bold text-primary">Academias Recentes</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Academia</th>
+                                    <th>Plano</th>
+                                    <th>Status</th>
+                                    <th>Criada em</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for academia in academias_recentes %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ academia.nome }}</strong><br>
+                                        <small class="text-muted">{{ academia.slug }}</small>
+                                    </td>
+                                    <td>
+                                        {% if academia.assinatura_atual %}
+                                            <span class="badge bg-info">{{ academia.assinatura_atual.plano.nome }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Sem plano</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if academia.ativa %}
+                                            <span class="badge bg-success">Ativa</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inativa</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small>{{ academia.data_criacao|date:"d/m/Y" }}</small>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">Nenhuma academia encontrada</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Distribuição por Planos -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 fw-bold text-primary">Distribuição por Planos</h6>
+                </div>
+                <div class="card-body">
+                    {% for plano_stat in stats.planos_distribuicao %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold">{{ plano_stat.nome }}</span>
+                            <span class="text-muted">{{ plano_stat.count }} academias</span>
+                        </div>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar" role="progressbar" 
+                                 style="width: {{ plano_stat.percentage }}%" 
+                                 aria-valuenow="{{ plano_stat.percentage }}" 
+                                 aria-valuemin="0" aria-valuemax="100">
+                                {{ plano_stat.percentage|floatformat:1 }}%
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Ações Rápidas -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 fw-bold text-primary">Ações Rápidas</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'admin_academias' %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-plus me-2"></i>Nova Academia
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'admin_planos' %}" class="btn btn-outline-success w-100">
+                                <i class="fas fa-tags me-2"></i>Gerenciar Planos
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <button class="btn btn-outline-info w-100" onclick="exportarRelatorio()">
+                                <i class="fas fa-download me-2"></i>Exportar Relatório
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="/admin/" class="btn btn-outline-warning w-100" target="_blank">
+                                <i class="fas fa-cog me-2"></i>Django Admin
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function exportarRelatorio() {
+    alert('Funcionalidade de exportação será implementada em breve!');
+}
+</script>
+{% endblock %}

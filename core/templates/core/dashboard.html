@@ -155,7 +155,7 @@
     </div>
   </div>
   <div class="section-actions">
-    <a href="{% url 'aluno_add' %}" class="btn-futuristic primary">
+    <a href="{% url 'aluno_add' slug=request.academia.slug %}" class="btn-futuristic primary">
       <i class="bi bi-plus-circle me-2"></i>
       <span>Adicionar Aluno</span>
       <div class="btn-glow"></div>
@@ -204,7 +204,7 @@
             </td>
             <td>
               <div class="student-info">
-                <a href="{% url 'aluno_detalhe' aluno.pk %}" class="student-name">{{ aluno.nome_completo }}</a>
+                <a href="{% url 'aluno_detalhe' slug=request.academia.slug pk=aluno.pk %}" class="student-name">{{ aluno.nome_completo }}</a>
                 <div class="student-meta">Matrícula #{{ aluno.pk|stringformat:"04d" }}</div>
               </div>
             </td>
@@ -226,7 +226,7 @@
             </td>
             <td>
               <div class="action-buttons">
-                <a href="{% url 'aluno_edit' aluno.pk %}" class="action-btn edit" title="Editar">
+                <a href="{% url 'aluno_edit' slug=request.academia.slug pk=aluno.pk %}" class="action-btn edit" title="Editar">
                 <i class="bi bi-pencil-square"></i>
               </a>
                 <button type="button" class="action-btn delete"
@@ -266,7 +266,7 @@
     </div>
   </div>
   <div class="section-actions">
-    <a href="{% url 'turma_add' %}" class="btn-futuristic secondary">
+    <a href="{% url 'turma_add' slug=request.academia.slug %}" class="btn-futuristic secondary">
       <i class="bi bi-plus-circle me-2"></i>
       <span>Nova Turma</span>
       <div class="btn-glow"></div>
@@ -340,7 +340,7 @@
         <i class="bi bi-collection-fill fs-1 mb-3"></i>
         <h5>Nenhuma turma cadastrada</h5>
         <p class="text-muted">Crie a primeira turma para começar a organizar os alunos</p>
-        <a href="{% url 'turma_add' %}" class="btn-futuristic primary mt-3">
+        <a href="{% url 'turma_add' slug=request.academia.slug %}" class="btn-futuristic primary mt-3">
           <i class="bi bi-plus-circle me-2"></i>
           <span>Criar Primeira Turma</span>
           <div class="btn-glow"></div>
@@ -529,7 +529,7 @@ $(document).ready(function() {
     responseArea.append(typingDiv);
     responseArea.scrollTop(responseArea[0].scrollHeight);
 
-    fetch("{% url 'ask_ia_agent' %}", {
+    fetch("{% url 'ask_ia_agent' slug=request.academia.slug %}", {
       method: 'POST',
       headers: {'Content-Type':'application/json','X-CSRFToken': csrfToken},
       body: JSON.stringify({question: questionText})

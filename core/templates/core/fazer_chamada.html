@@ -15,7 +15,7 @@
                 Horário: {{ turma.horario_inicio|time:"H:i" }} | Data: {{ data_hoje|date:"d/m/Y" }}
             </p>
         </div>
-        <a href="{% url 'pagina_presenca' %}" class="btn btn-secondary">
+        <a href="/{{ request.academia_slug }}/presenca/" class="btn btn-secondary">
             <i class="bi bi-arrow-left me-1"></i> Voltar
         </a>
     </div>

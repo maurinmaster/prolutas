@@ -15,14 +15,108 @@ from .models import (
 
 class CustomUserCreationForm(UserCreationForm):
     """ Formulário para criar um novo usuário (dono da academia). """
+    # Campos adicionais para dados pessoais
+    cpf = forms.CharField(
+        max_length=14,
+        label='CPF',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '000.000.000-00',
+            'data-mask': '000.000.000-00'
+        })
+    )
+    
+    telefone = forms.CharField(
+        max_length=15,
+        label='Telefone',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '(00) 00000-0000',
+            'data-mask': '(00) 00000-0000'
+        })
+    )
+    
+    data_nascimento = forms.DateField(
+        label='Data de Nascimento',
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date'
+        })
+    )
+    
+    endereco_completo = forms.CharField(
+        max_length=200,
+        label='Endereço Completo',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Rua, número, bairro, cidade - UF'
+        })
+    )
+    
     class Meta(UserCreationForm.Meta):
-        fields = UserCreationForm.Meta.fields + ('first_name', 'last_name', 'email')
+        fields = ('username', 'first_name', 'last_name', 'email', 'password1', 'password2')
+        widgets = {
+            'username': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'seu@email.com'
+            }),
+            'first_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nome'
+            }),
+            'last_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Sobrenome'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'seu@email.com'
+            }),
+            'password1': forms.PasswordInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Digite sua senha'
+            }),
+            'password2': forms.PasswordInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Confirme sua senha'
+            }),
+        }
 
 class AcademiaForm(forms.ModelForm):
     """ Formulário para os dados da academia. """
     class Meta:
         model = Academia
         exclude = ['dono']
+        widgets = {
+            'nome_fantasia': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nome Fantasia da Academia'
+            }),
+            'razao_social': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Razão Social da Empresa'
+            }),
+            'cnpj': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '00.000.000/0000-00 (Opcional)',
+                'data-mask': '00.000.000/0000-00'
+            }),
+            'telefone': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '(00) 00000-0000',
+                'data-mask': '(00) 00000-0000'
+            }),
+            'endereco': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Endereço completo da academia'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Tornar CNPJ opcional
+        self.fields['cnpj'].required = False
+        self.fields['cnpj'].help_text = "CNPJ é opcional para pessoas físicas"
 
 # -----------------------------------------------------------------------------
 # FORMULÁRIOS DAS ENTIDADES PRINCIPAIS
@@ -276,3 +370,143 @@ class ReprovacaoForm(forms.ModelForm):
         labels = {
             'observacoes': 'Observações (pontos a melhorar para o próximo exame)'
         }
+
+
+# -----------------------------------------------------------------------------
+# FORMULÁRIOS SAAS
+# -----------------------------------------------------------------------------
+
+class CadastroAcademiaForm(forms.Form):
+    """Formulário para cadastro de novas academias no sistema SaaS"""
+    
+    # Dados da Academia
+    nome = forms.CharField(
+        max_length=200,
+        label='Nome da Academia',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Nome da sua academia',
+            'id': 'id_nome'
+        })
+    )
+    
+    slug = forms.SlugField(
+        max_length=100,
+        label='URL da Academia',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'url-da-academia',
+            'id': 'id_slug'
+        }),
+        help_text='URL única para sua academia (apenas letras, números e hífens)'
+    )
+    
+    email = forms.EmailField(
+        label='Email de Contato',
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'contato@suaacademia.com',
+            'id': 'id_email'
+        })
+    )
+    
+    telefone = forms.CharField(
+        max_length=20,
+        label='Telefone',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '(11) 99999-9999',
+            'id': 'id_telefone'
+        })
+    )
+    
+    endereco = forms.CharField(
+        label='Endereço Completo',
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 3,
+            'placeholder': 'Endereço completo da academia',
+            'id': 'id_endereco'
+        })
+    )
+    
+    # Dados do Administrador
+    admin_nome = forms.CharField(
+        max_length=150,
+        label='Nome do Administrador',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Nome completo do administrador',
+            'id': 'id_admin_nome'
+        })
+    )
+    
+    admin_email = forms.EmailField(
+        label='Email do Administrador',
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'admin@suaacademia.com',
+            'id': 'id_admin_email'
+        })
+    )
+    
+    admin_senha = forms.CharField(
+        label='Senha',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Senha do administrador',
+            'id': 'id_admin_senha'
+        }),
+        min_length=8
+    )
+    
+    admin_senha_confirmacao = forms.CharField(
+        label='Confirmar Senha',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Confirme a senha',
+            'id': 'id_admin_senha_confirmacao'
+        })
+    )
+    
+    def clean_slug(self):
+        slug = self.cleaned_data['slug']
+        
+        # Verificar se o slug já existe
+        if Academia.objects.filter(slug=slug).exists():
+            raise forms.ValidationError('Esta URL já está em uso. Escolha outra.')
+        
+        # Verificar se o slug não é uma palavra reservada
+        palavras_reservadas = [
+            'admin', 'api', 'www', 'mail', 'ftp', 'blog', 'shop', 'store',
+            'app', 'mobile', 'web', 'site', 'portal', 'sistema', 'planos',
+            'cadastro', 'login', 'logout', 'sobre', 'contato', 'help', 'suporte'
+        ]
+        
+        if slug.lower() in palavras_reservadas:
+            raise forms.ValidationError('Esta URL é reservada. Escolha outra.')
+        
+        return slug
+    
+    def clean_admin_email(self):
+        from django.contrib.auth.models import User
+        email = self.cleaned_data['admin_email']
+        
+        # Verificar se o email já está em uso
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError('Este email já está cadastrado no sistema.')
+        
+        return email
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        senha = cleaned_data.get('admin_senha')
+        confirmacao = cleaned_data.get('admin_senha_confirmacao')
+        
+        if senha and confirmacao:
+            if senha != confirmacao:
+                raise forms.ValidationError('As senhas não coincidem.')
+        
+        return cleaned_data
+
+

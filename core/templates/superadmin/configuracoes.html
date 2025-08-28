@@ -1,0 +1,198 @@
+{% extends 'superadmin/base.html' %}
+{% load static %}
+
+{% block title %}Configurações do Sistema - SuperAdmin ProLutas{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cogs me-2"></i>
+                        Configurações do Sistema
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Configurações Gerais -->
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Configurações Gerais</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form>
+                                        <div class="mb-3">
+                                            <label for="siteName" class="form-label">Nome do Site</label>
+                                            <input type="text" class="form-control" id="siteName" value="ProLutas SaaS">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="siteUrl" class="form-label">URL do Site</label>
+                                            <input type="url" class="form-control" id="siteUrl" value="https://prolutas.com">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="supportEmail" class="form-label">Email de Suporte</label>
+                                            <input type="email" class="form-control" id="supportEmail" value="suporte@prolutas.com">
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="maintenanceMode">
+                                                <label class="form-check-label" for="maintenanceMode">
+                                                    Modo de Manutenção
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Configurações de Email -->
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Configurações de Email</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form>
+                                        <div class="mb-3">
+                                            <label for="smtpHost" class="form-label">Servidor SMTP</label>
+                                            <input type="text" class="form-control" id="smtpHost" value="smtp.gmail.com">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="smtpPort" class="form-label">Porta SMTP</label>
+                                            <input type="number" class="form-control" id="smtpPort" value="587">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="smtpUser" class="form-label">Usuário SMTP</label>
+                                            <input type="email" class="form-control" id="smtpUser">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="smtpPassword" class="form-label">Senha SMTP</label>
+                                            <input type="password" class="form-control" id="smtpPassword">
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="smtpTls" checked>
+                                                <label class="form-check-label" for="smtpTls">
+                                                    Usar TLS
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Configurações de Pagamento -->
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Configurações de Pagamento</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form>
+                                        <div class="mb-3">
+                                            <label for="stripePublicKey" class="form-label">Chave Pública Stripe</label>
+                                            <input type="text" class="form-control" id="stripePublicKey" placeholder="pk_...">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="stripeSecretKey" class="form-label">Chave Secreta Stripe</label>
+                                            <input type="password" class="form-control" id="stripeSecretKey" placeholder="sk_...">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="webhookSecret" class="form-label">Webhook Secret</label>
+                                            <input type="password" class="form-control" id="webhookSecret" placeholder="whsec_...">
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="testMode" checked>
+                                                <label class="form-check-label" for="testMode">
+                                                    Modo de Teste
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Configurações de Backup -->
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Configurações de Backup</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form>
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="autoBackup" checked>
+                                                <label class="form-check-label" for="autoBackup">
+                                                    Backup Automático
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="backupFrequency" class="form-label">Frequência</label>
+                                            <select class="form-select" id="backupFrequency">
+                                                <option value="daily">Diário</option>
+                                                <option value="weekly" selected>Semanal</option>
+                                                <option value="monthly">Mensal</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="backupRetention" class="form-label">Retenção (dias)</label>
+                                            <input type="number" class="form-control" id="backupRetention" value="30">
+                                        </div>
+                                        <div class="mb-3">
+                                            <button type="button" class="btn btn-outline-primary" onclick="createBackup()">
+                                                <i class="fas fa-download"></i> Criar Backup Agora
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botões de Ação -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-secondary" onclick="resetSettings()">
+                                    <i class="fas fa-undo"></i> Restaurar Padrões
+                                </button>
+                                <button type="button" class="btn btn-success" onclick="saveSettings()">
+                                    <i class="fas fa-save"></i> Salvar Configurações
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function saveSettings() {
+    // Implementar salvamento das configurações
+    alert('Configurações salvas com sucesso!');
+}
+
+function resetSettings() {
+    if (confirm('Tem certeza que deseja restaurar as configurações padrão?')) {
+        // Implementar restauração das configurações
+        console.log('Restaurando configurações padrão...');
+    }
+}
+
+function createBackup() {
+    // Implementar criação de backup
+    alert('Backup criado com sucesso!');
+}
+</script>
+{% endblock %}

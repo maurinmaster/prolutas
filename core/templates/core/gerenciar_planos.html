@@ -23,7 +23,7 @@
             {% for plano in planos %}
             <div class="list-group-item d-flex justify-content-between align-items-center">
                 <span><strong>{{ plano.nome }}</strong> - R$ {{ plano.valor }}</span>
-                <form action="{% url 'deletar_plano' plano.pk %}" method="post" onsubmit="return confirm('Tem certeza?');">
+                <form action="{% url 'deletar_plano' academia.slug plano.pk %}" method="post" onsubmit="return confirm('Tem certeza?');">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir"><i class="bi bi-trash"></i></button>
                 </form>

@@ -9,7 +9,7 @@
 
 <div class="card shadow-sm mb-4">
     <div class="card-body">
-        <form method="get" action="{% url 'pagina_presenca' %}">
+        <form method="get" action="/{{ request.academia_slug }}/presenca/">
             <div class="input-group">
                 <input type="text" name="q" class="form-control" placeholder="Buscar aluno pelo nome..." value="{{ termo_busca }}">
                 <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Buscar</button>
@@ -33,7 +33,7 @@
             {% if aluno.id in presentes_hoje_ids %}
                 <span class="badge bg-success fs-6"><i class="bi bi-check-lg"></i> Presente</span>
             {% else %}
-                <form action="{% url 'marcar_presenca_geral' aluno.pk %}" method="post">
+                <form action="{% url 'marcar_presenca_geral' slug=request.academia.slug aluno_pk=aluno.pk %}" method="post">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-primary btn-sm">Marcar Presença</button>
                 </form>

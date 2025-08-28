@@ -15,14 +15,27 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
-from django.conf import settings # Importe
-from django.conf.urls.static import static # Importe
+from django.urls import path, include, re_path
+from django.conf import settings
+from django.conf.urls.static import static
+from core.urls_saas import public_urlpatterns, academia_urlpatterns
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('core.urls')),
+    
+    # Área administrativa do SaaS (superadmin) - completamente separada
+    path('superadmin/', include('core.urls_superadmin')),
+    
+    # URLs públicas do SaaS (sem slug)
+    *public_urlpatterns,
+    
+    # URLs específicas da academia (com slug)
+    re_path(r'^(?P<slug>[a-zA-Z0-9-_]+)/', include([
+        *academia_urlpatterns,
+        path('', include('core.urls')),  # URLs internas da academia
+    ])),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

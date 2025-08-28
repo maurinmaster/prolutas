@@ -1,0 +1,366 @@
+{% extends 'superadmin/base.html' %}
+
+{% block title %}Gerenciar Planos - SuperAdmin ProLutas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">
+        <i class="fas fa-tags me-2 text-primary"></i>
+        Gerenciar Planos SaaS
+    </h1>
+    <div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#novoPlanoModal">
+            <i class="fas fa-plus me-2"></i>
+            Novo Plano
+        </button>
+    </div>
+</div>
+
+<!-- Lista de Planos -->
+<div class="row">
+    {% for plano in planos %}
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card card-superadmin h-100 {% if plano.destaque %}border-primary{% endif %}">
+            {% if plano.destaque %}
+                <div class="card-header bg-primary text-white text-center">
+                    <i class="fas fa-star me-2"></i>
+                    <strong>MAIS POPULAR</strong>
+                </div>
+            {% endif %}
+            <div class="card-body d-flex flex-column">
+                <div class="text-center mb-3">
+                    <h4 class="card-title text-primary">{{ plano.nome }}</h4>
+                    <p class="text-muted">{{ plano.descricao }}</p>
+                </div>
+                
+                <div class="text-center mb-4">
+                    <div class="display-6 text-primary fw-bold">
+                        R$ {{ plano.preco_mensal }}
+                        <small class="text-muted fs-6">/mês</small>
+                    </div>
+                    {% if plano.preco_anual %}
+                        <div class="text-muted">
+                            <small>ou R$ {{ plano.preco_anual }}/ano</small>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-4 flex-grow-1">
+                    <h6 class="text-uppercase text-muted mb-3">Recursos Inclusos:</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-users text-success me-2"></i>
+                            {% if plano.max_alunos == -1 %}
+                                Alunos ilimitados
+                            {% else %}
+                                Até {{ plano.max_alunos }} alunos
+                            {% endif %}
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-chalkboard-teacher text-success me-2"></i>
+                            {% if plano.max_professores == -1 %}
+                                Professores ilimitados
+                            {% else %}
+                                Até {{ plano.max_professores }} professores
+                            {% endif %}
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-dumbbell text-success me-2"></i>
+                            {% if plano.max_modalidades == -1 %}
+                                Modalidades ilimitadas
+                            {% else %}
+                                Até {{ plano.max_modalidades }} modalidades
+                            {% endif %}
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-calendar text-success me-2"></i>
+                            {% if plano.max_turmas == -1 %}
+                                Turmas ilimitadas
+                            {% else %}
+                                Até {{ plano.max_turmas }} turmas
+                            {% endif %}
+                        </li>
+                        
+                        {% if plano.integracao_whatsapp %}
+                        <li class="mb-2">
+                            <i class="fab fa-whatsapp text-success me-2"></i>
+                            Integração WhatsApp
+                        </li>
+                        {% endif %}
+                        
+                        {% if plano.sistema_graduacao %}
+                        <li class="mb-2">
+                            <i class="fas fa-medal text-success me-2"></i>
+                            Sistema de Graduação
+                        </li>
+                        {% endif %}
+                        
+                        {% if plano.relatorios_avancados %}
+                        <li class="mb-2">
+                            <i class="fas fa-chart-bar text-success me-2"></i>
+                            Relatórios Avançados
+                        </li>
+                        {% endif %}
+                        
+                        {% if plano.backup_automatico %}
+                        <li class="mb-2">
+                            <i class="fas fa-cloud text-success me-2"></i>
+                            Backup Automático
+                        </li>
+                        {% endif %}
+                        
+                        {% if plano.suporte_prioritario %}
+                        <li class="mb-2">
+                            <i class="fas fa-headset text-success me-2"></i>
+                            Suporte Prioritário
+                        </li>
+                        {% endif %}
+                        
+                        {% if plano.api_acesso %}
+                        <li class="mb-2">
+                            <i class="fas fa-code text-success me-2"></i>
+                            Acesso à API
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <div class="mt-auto">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <span class="badge {% if plano.ativo %}bg-success{% else %}bg-secondary{% endif %}">
+                                {% if plano.ativo %}Ativo{% else %}Inativo{% endif %}
+                            </span>
+                            {% if plano.destaque %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="fas fa-star me-1"></i>Destaque
+                                </span>
+                            {% endif %}
+                        </div>
+                        <small class="text-muted">Ordem: {{ plano.ordem }}</small>
+                    </div>
+                    
+                    <div class="btn-group w-100" role="group">
+                        <button class="btn btn-outline-primary" 
+                                onclick="editPlano('{{ plano.id }}')" 
+                                title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-outline-info" 
+                                onclick="viewPlanoStats('{{ plano.id }}')" 
+                                title="Estatísticas">
+                            <i class="fas fa-chart-line"></i>
+                        </button>
+                        <button class="btn btn-outline-warning" 
+                                onclick="togglePlanoStatus('{{ plano.id }}', {{ plano.ativo|yesno:'false,true' }})" 
+                                title="{% if plano.ativo %}Desativar{% else %}Ativar{% endif %}">
+                            <i class="fas {% if plano.ativo %}fa-pause{% else %}fa-play{% endif %}"></i>
+                        </button>
+                        <button class="btn btn-outline-danger" 
+                                onclick="deletePlano('{{ plano.id }}')" 
+                                title="Excluir">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card card-superadmin">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Nenhum plano cadastrado</h5>
+                <p class="text-muted">Comece criando o primeiro plano SaaS do sistema.</p>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#novoPlanoModal">
+                    <i class="fas fa-plus me-2"></i>
+                    Criar Primeiro Plano
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Estatísticas dos Planos -->
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card card-superadmin border-left-primary">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total de Planos
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ planos.count }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-tags fa-2x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-superadmin border-left-success">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Planos Ativos
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            {{ planos|length }}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-check fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-superadmin border-left-info">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Plano Mais Popular
+                        </div>
+                        <div class="h6 mb-0 font-weight-bold text-gray-800">
+                            {% for plano in planos %}
+                                {% if plano.destaque %}
+                                    {{ plano.nome }}
+                                {% endif %}
+                            {% empty %}
+                                Nenhum
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-star fa-2x text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-superadmin border-left-warning">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Preço Médio
+                        </div>
+                        <div class="h6 mb-0 font-weight-bold text-gray-800">
+                            {% if planos %}
+                                R$ {% widthratio planos.0.preco_mensal 1 1 %}
+                            {% else %}
+                                R$ 0,00
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-dollar-sign fa-2x text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Novo Plano -->
+<div class="modal fade" id="novoPlanoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus me-2"></i>
+                    Novo Plano SaaS
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="novoPlanoForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nome do Plano *</label>
+                            <input type="text" class="form-control" name="nome" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Slug *</label>
+                            <input type="text" class="form-control" name="slug" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descrição</label>
+                        <textarea class="form-control" name="descricao" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Preço Mensal (R$) *</label>
+                            <input type="number" class="form-control" name="preco_mensal" step="0.01" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Preço Anual (R$)</label>
+                            <input type="number" class="form-control" name="preco_anual" step="0.01">
+                        </div>
+                    </div>
+                    <!-- Mais campos serão adicionados conforme necessário -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarPlano()">Salvar Plano</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function editPlano(planoId) {
+    // Implementar edição de plano
+    alert('Editar plano ID: ' + planoId);
+}
+
+function viewPlanoStats(planoId) {
+    // Implementar visualização de estatísticas
+    alert('Estatísticas do plano ID: ' + planoId);
+}
+
+function togglePlanoStatus(planoId, newStatus) {
+    const action = newStatus ? 'ativar' : 'desativar';
+    if (confirm(`Tem certeza que deseja ${action} este plano?`)) {
+        // Implementar toggle de status
+        alert(`${action} plano ID: ${planoId}`);
+    }
+}
+
+function deletePlano(planoId) {
+    if (confirm('Tem certeza que deseja excluir este plano? Esta ação não pode ser desfeita.')) {
+        // Implementar exclusão
+        alert('Excluir plano ID: ' + planoId);
+    }
+}
+
+function salvarPlano() {
+    // Implementar salvamento de novo plano
+    alert('Salvar novo plano');
+    $('#novoPlanoModal').modal('hide');
+}
+
+// Auto-gerar slug baseado no nome
+document.querySelector('input[name="nome"]').addEventListener('input', function() {
+    const slug = this.value.toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim('-');
+    document.querySelector('input[name="slug"]').value = slug;
+});
+</script>
+{% endblock %}

@@ -1,0 +1,372 @@
+{% extends 'vendas/base.html' %}
+
+{% block title %}Checkout - {{ plano.nome }} - {{ config.titulo_site }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'vendas:pagina_inicial' %}">Início</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'vendas:planos_precos' %}">Planos</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Checkout</li>
+                </ol>
+            </nav>
+
+            <!-- Plano Selecionado -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="mb-0">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        Plano Selecionado: {{ plano.nome }}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Detalhes do Plano</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-people me-2"></i>Até {{ plano.max_alunos }} alunos</li>
+                                <li><i class="bi bi-person-badge me-2"></i>Até {{ plano.max_professores }} professores</li>
+                                <li><i class="bi bi-collection me-2"></i>Até {{ plano.max_modalidades }} modalidades</li>
+                                <li><i class="bi bi-calendar-week me-2"></i>Até {{ plano.max_turmas }} turmas</li>
+                                {% if plano.integracao_whatsapp %}
+                                <li><i class="bi bi-whatsapp me-2"></i>Integração WhatsApp</li>
+                                {% endif %}
+                                {% if plano.sistema_graduacao %}
+                                <li><i class="bi bi-trophy me-2"></i>Sistema de Graduação</li>
+                                {% endif %}
+                                {% if plano.relatorios_avancados %}
+                                <li><i class="bi bi-graph-up me-2"></i>Relatórios Avançados</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Preços</h5>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Mensal:</span>
+                                    <span class="fw-bold">R$ {{ plano.preco_mensal }}/mês</span>
+                                </div>
+                                {% if plano.preco_anual %}
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Anual:</span>
+                                    <span class="fw-bold text-success">R$ {{ plano.preco_anual }}/ano</span>
+                                </div>
+                                <small class="text-muted">Economia de {{ plano.desconto_anual }}%</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulário de Checkout -->
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="bi bi-credit-card me-2"></i>
+                        Informações de Pagamento
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form id="checkout-form">
+                        <!-- Ciclo de Pagamento -->
+                        <div class="mb-4">
+                            <h5>Escolha o ciclo de pagamento</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check border rounded p-3 mb-2">
+                                        <input class="form-check-input" type="radio" name="ciclo_pagamento" id="mensal" value="mensal" checked>
+                                        <label class="form-check-label" for="mensal">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <strong>Mensal</strong>
+                                                    <br><small class="text-muted">Cobrança mensal</small>
+                                                </div>
+                                                <div class="text-end">
+                                                    <strong>R$ {{ plano.preco_mensal }}</strong>
+                                                    <br><small class="text-muted">/mês</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                {% if plano.preco_anual %}
+                                <div class="col-md-6">
+                                    <div class="form-check border rounded p-3 mb-2">
+                                        <input class="form-check-input" type="radio" name="ciclo_pagamento" id="anual" value="anual">
+                                        <label class="form-check-label" for="anual">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <strong>Anual</strong>
+                                                    <br><small class="text-muted">Cobrança anual</small>
+                                                </div>
+                                                <div class="text-end">
+                                                    <strong class="text-success">R$ {{ plano.preco_anual }}</strong>
+                                                    <br><small class="text-success">/ano ({{ plano.desconto_anual }}% desconto)</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Cupom de Desconto -->
+                        <div class="mb-4">
+                            <h5>Cupom de Desconto (Opcional)</h5>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="cupom-codigo" placeholder="Digite o código do cupom">
+                                <button class="btn btn-outline-primary" type="button" id="aplicar-cupom">
+                                    <i class="bi bi-tag me-1"></i>
+                                    Aplicar
+                                </button>
+                            </div>
+                            <div id="cupom-mensagem" class="mt-2"></div>
+                        </div>
+
+                        <!-- Resumo do Pedido -->
+                        <div class="mb-4">
+                            <h5>Resumo do Pedido</h5>
+                            <div class="border rounded p-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Plano {{ plano.nome }}:</span>
+                                    <span id="valor-plano">R$ {{ plano.preco_mensal }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2" id="desconto-linha" style="display: none;">
+                                    <span>Desconto:</span>
+                                    <span id="valor-desconto" class="text-success">-R$ 0,00</span>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <strong>Total:</strong>
+                                    <strong id="valor-total">R$ {{ plano.preco_mensal }}</strong>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="bi bi-shield-check me-1"></i>
+                                    Inclui {{ config.trial_dias|default:14 }} dias de teste gratuito
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Termos e Condições -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="aceitar-termos" required>
+                                <label class="form-check-label" for="aceitar-termos">
+                                    Li e aceito os <a href="{% url 'vendas:termos_uso' %}" target="_blank">Termos de Uso</a> 
+                                    e a <a href="{% url 'vendas:politica_privacidade' %}" target="_blank">Política de Privacidade</a>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Botão de Pagamento -->
+                        <button type="submit" class="btn btn-primary btn-lg w-100" id="btn-pagamento" disabled>
+                            <i class="bi bi-lock me-2"></i>
+                            <span id="btn-texto">Aceite os termos para continuar</span>
+                        </button>
+
+                        <div class="text-center mt-3">
+                            <small class="text-muted">
+                                <i class="bi bi-shield-lock me-1"></i>
+                                Pagamento seguro processado pelo Stripe
+                            </small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Informações Adicionais -->
+            <div class="row mt-4">
+                <div class="col-md-4 text-center">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <i class="bi bi-shield-check text-primary" style="font-size: 2rem;"></i>
+                            <h6 class="mt-2">Teste Grátis</h6>
+                            <small class="text-muted">{{ config.trial_dias|default:14 }} dias para testar</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <i class="bi bi-arrow-clockwise text-primary" style="font-size: 2rem;"></i>
+                            <h6 class="mt-2">Cancelamento</h6>
+                            <small class="text-muted">Cancele a qualquer momento</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <i class="bi bi-headset text-primary" style="font-size: 2rem;"></i>
+                            <h6 class="mt-2">Suporte</h6>
+                            <small class="text-muted">Suporte 24/7 disponível</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Configuração do Stripe
+const stripe = Stripe('{{ stripe_public_key|default:"pk_test_..." }}');
+
+// Variáveis globais
+let cupomAplicado = null;
+let valorAtual = {{ plano.preco_mensal }};
+
+// Elementos do DOM
+const form = document.getElementById('checkout-form');
+const btnPagamento = document.getElementById('btn-pagamento');
+const btnTexto = document.getElementById('btn-texto');
+const aceitarTermos = document.getElementById('aceitar-termos');
+const cupomCodigo = document.getElementById('cupom-codigo');
+const aplicarCupom = document.getElementById('aplicar-cupom');
+const cupomMensagem = document.getElementById('cupom-mensagem');
+
+// Atualizar botão baseado nos termos
+aceitarTermos.addEventListener('change', function() {
+    if (this.checked) {
+        btnPagamento.disabled = false;
+        btnTexto.textContent = 'Processar Pagamento';
+    } else {
+        btnPagamento.disabled = true;
+        btnTexto.textContent = 'Aceite os termos para continuar';
+    }
+});
+
+// Atualizar valores baseado no ciclo de pagamento
+document.querySelectorAll('input[name="ciclo_pagamento"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        atualizarValores();
+    });
+});
+
+// Aplicar cupom
+aplicarCupom.addEventListener('click', function() {
+    const codigo = cupomCodigo.value.trim();
+    if (!codigo) {
+        mostrarMensagemCupom('Digite um código de cupom', 'warning');
+        return;
+    }
+
+    // Simular verificação de cupom (na implementação real, seria uma chamada AJAX)
+    verificarCupom(codigo);
+});
+
+// Verificar cupom via AJAX
+function verificarCupom(codigo) {
+    fetch(`/vendas/verificar-cupom/?codigo=${encodeURIComponent(codigo)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.valido) {
+                cupomAplicado = data.cupom;
+                mostrarMensagemCupom('Cupom aplicado com sucesso!', 'success');
+                atualizarValores();
+            } else {
+                mostrarMensagemCupom(data.mensagem || 'Cupom inválido', 'danger');
+            }
+        })
+        .catch(error => {
+            mostrarMensagemCupom('Erro ao verificar cupom', 'danger');
+        });
+}
+
+// Mostrar mensagem do cupom
+function mostrarMensagemCupom(mensagem, tipo) {
+    cupomMensagem.innerHTML = `<div class="alert alert-${tipo} alert-sm">${mensagem}</div>`;
+}
+
+// Atualizar valores na tela
+function atualizarValores() {
+    const cicloPagamento = document.querySelector('input[name="ciclo_pagamento"]:checked').value;
+    
+    if (cicloPagamento === 'anual') {
+        valorAtual = {{ plano.preco_anual }};
+    } else {
+        valorAtual = {{ plano.preco_mensal }};
+    }
+
+    // Aplicar desconto do cupom se houver
+    let desconto = 0;
+    if (cupomAplicado) {
+        if (cupomAplicado.desconto_fixo > 0) {
+            desconto = cupomAplicado.desconto_fixo;
+        } else {
+            desconto = (valorAtual * cupomAplicado.desconto_percentual) / 100;
+        }
+    }
+
+    const valorFinal = valorAtual - desconto;
+
+    // Atualizar valores na tela
+    document.getElementById('valor-plano').textContent = `R$ ${valorAtual.toFixed(2)}`;
+    
+    if (desconto > 0) {
+        document.getElementById('desconto-linha').style.display = 'flex';
+        document.getElementById('valor-desconto').textContent = `-R$ ${desconto.toFixed(2)}`;
+    } else {
+        document.getElementById('desconto-linha').style.display = 'none';
+    }
+    
+    document.getElementById('valor-total').textContent = `R$ ${valorFinal.toFixed(2)}`;
+}
+
+// Processar checkout
+form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    if (!aceitarTermos.checked) {
+        alert('Você deve aceitar os termos de uso para continuar.');
+        return;
+    }
+
+    // Desabilitar botão
+    btnPagamento.disabled = true;
+    btnTexto.textContent = 'Processando...';
+
+    // Dados para enviar
+    const dados = {
+        plano_slug: '{{ plano.slug }}',
+        ciclo_pagamento: document.querySelector('input[name="ciclo_pagamento"]:checked').value,
+        cupom: cupomAplicado ? cupomAplicado.codigo : ''
+    };
+
+    // Criar sessão de pagamento
+    fetch('{% url "vendas:criar_sessao_pagamento" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(dados)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        // Redirecionar para o Stripe
+        window.location.href = data.url;
+    })
+    .catch(error => {
+        alert('Erro ao processar pagamento: ' + error.message);
+        btnPagamento.disabled = false;
+        btnTexto.textContent = 'Processar Pagamento';
+    });
+});
+
+// Inicializar valores
+atualizarValores();
+</script>
+{% endblock %}

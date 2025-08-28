@@ -4,6 +4,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from django.core.management import call_command
 from django_apscheduler.jobstores import DjangoJobStore
 import sys
+from core.models import Academia
 
 def job_gerar_faturas():
     """
@@ -17,13 +18,19 @@ def job_gerar_faturas():
 
 def job_agente_ia():
     """
-    Função que executa o nosso agente de IA.
+    Função que executa o nosso agente de IA para TODAS as academias cadastradas.
     """
-    try:
-        call_command('agente_ia')
-        print("Tarefa 'agente_ia' executada com sucesso.")
-    except Exception as e:
-        print(f"Erro ao executar o job 'agente_ia': {e}")
+    academias = Academia.objects.all()
+    if not academias:
+        print("Nenhuma academia encontrada para executar o agente de IA.")
+        return
+    
+    for academia in academias:
+        try:
+            print(f"Executando agente de IA para a academia ID: {academia.id} ({academia.nome_fantasia})")
+            call_command('agente_ia', academia.id)
+        except Exception as e:
+            print(f"Erro ao executar o job 'agente_ia' para a academia ID {academia.id}: {e}")
 
 def start():
     """

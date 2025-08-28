@@ -1,5 +1,6 @@
 from datetime import date
 from .models import Aluno, Presenca, LogMensagem
+from django.conf import settings
 
 
 def stats_context(request):
@@ -10,7 +11,7 @@ def stats_context(request):
         return {}
     
     try:
-        academia = request.user.academia_dono
+        academia = request.academia
         
         # Cards essenciais
         total_alunos = Aluno.objects.filter(academia=academia, ativo=True).count()
@@ -30,3 +31,10 @@ def stats_context(request):
             'presencas_hoje': '—',
             'mensagens_hoje': '—',
         }
+
+
+def site_settings(request):
+    """Context processor para disponibilizar configurações do site nos templates."""
+    return {
+        'site_url': getattr(settings, 'SITE_URL', 'http://127.0.0.1:8001'),
+    }

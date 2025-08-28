@@ -1,0 +1,101 @@
+{% extends 'superadmin/base.html' %}
+{% load static %}
+
+{% block title %}Logs do Sistema - SuperAdmin ProLutas{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-file-alt me-2"></i>
+                        Logs do Sistema
+                    </h5>
+                    <div>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="refreshLogs()">
+                            <i class="fas fa-sync-alt"></i> Atualizar
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="clearLogs()">
+                            <i class="fas fa-trash"></i> Limpar
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Filtros -->
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <select class="form-select" id="logLevel">
+                                <option value="">Todos os níveis</option>
+                                <option value="ERROR">Erro</option>
+                                <option value="WARNING">Aviso</option>
+                                <option value="INFO">Info</option>
+                                <option value="DEBUG">Debug</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="date" class="form-control" id="logDate" placeholder="Data">
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="logSearch" placeholder="Buscar nos logs...">
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-primary" onclick="filterLogs()">
+                                <i class="fas fa-search"></i> Filtrar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Área de logs -->
+                    <div class="log-container" style="height: 500px; overflow-y: auto; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 0.375rem; padding: 1rem; font-family: 'Courier New', monospace;">
+                        <div class="log-entry text-danger">
+                            <span class="log-time">[2025-08-28 10:58:21]</span>
+                            <span class="log-level">[ERROR]</span>
+                            <span class="log-message">Not Found: /superadmin/logs/</span>
+                        </div>
+                        <div class="log-entry text-warning">
+                            <span class="log-time">[2025-08-28 10:58:20]</span>
+                            <span class="log-level">[WARNING]</span>
+                            <span class="log-message">Tentativa de acesso não autorizado detectada</span>
+                        </div>
+                        <div class="log-entry text-info">
+                            <span class="log-time">[2025-08-28 10:58:15]</span>
+                            <span class="log-level">[INFO]</span>
+                            <span class="log-message">Usuário admin logado com sucesso</span>
+                        </div>
+                        <div class="log-entry text-muted">
+                            <span class="log-time">[2025-08-28 10:58:10]</span>
+                            <span class="log-level">[DEBUG]</span>
+                            <span class="log-message">Middleware de tenant executado para academia: exemplo-academia</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function refreshLogs() {
+    // Implementar atualização dos logs
+    console.log('Atualizando logs...');
+}
+
+function clearLogs() {
+    if (confirm('Tem certeza que deseja limpar todos os logs?')) {
+        // Implementar limpeza dos logs
+        console.log('Limpando logs...');
+    }
+}
+
+function filterLogs() {
+    const level = document.getElementById('logLevel').value;
+    const date = document.getElementById('logDate').value;
+    const search = document.getElementById('logSearch').value;
+    
+    // Implementar filtro dos logs
+    console.log('Filtrando logs:', { level, date, search });
+}
+</script>
+{% endblock %}

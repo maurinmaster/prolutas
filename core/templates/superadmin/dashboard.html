@@ -1,0 +1,225 @@
+{% extends 'superadmin/base.html' %}
+
+{% block title %}Dashboard - SuperAdmin ProLutas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">
+        <i class="fas fa-tachometer-alt me-2 text-primary"></i>
+        Dashboard SuperAdmin
+    </h1>
+    <div class="text-muted">
+        <i class="fas fa-calendar me-1"></i>
+        {{ "now"|date:"d/m/Y H:i" }}
+    </div>
+</div>
+
+<!-- Cards de Estatísticas -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card card-superadmin border-left-primary h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total de Academias
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_academias }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-building fa-2x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card card-superadmin border-left-success h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Academias Ativas
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ academias_ativas }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-check-circle fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card card-superadmin border-left-warning h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Em Trial
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ academias_trial }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-clock fa-2x text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card card-superadmin border-left-info h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Receita Mensal
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">R$ {{ receita_mensal|floatformat:2 }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-dollar-sign fa-2x text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráficos e Tabelas -->
+<div class="row">
+    <!-- Academias Recentes -->
+    <div class="col-lg-6 mb-4">
+        <div class="card card-superadmin">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    Academias Recentes
+                </h6>
+                <a href="/superadmin/academias/" class="btn btn-sm btn-superadmin">
+                    Ver Todas
+                </a>
+            </div>
+            <div class="card-body">
+                {% if academias_recentes %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Academia</th>
+                                    <th>Plano</th>
+                                    <th>Status</th>
+                                    <th>Criada em</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for academia in academias_recentes %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ academia.nome }}</strong><br>
+                                        <small class="text-muted">{{ academia.slug }}</small>
+                                    </td>
+                                    <td>{{ academia.plano.nome }}</td>
+                                    <td>
+                                        {% if academia.ativa %}
+                                            <span class="badge bg-success">Ativa</span>
+                                        {% elif academia.em_trial %}
+                                            <span class="badge bg-warning">Trial</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inativa</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ academia.criada_em|date:"d/m/Y" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center py-4">
+                        <i class="fas fa-inbox fa-2x d-block mb-2"></i>
+                        Nenhuma academia cadastrada ainda.
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Ações Rápidas -->
+    <div class="col-lg-6 mb-4">
+        <div class="card card-superadmin">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-bolt me-2"></i>
+                    Ações Rápidas
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-3">
+                    <a href="/superadmin/academias/" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-building me-2"></i>
+                        Gerenciar Academias
+                    </a>
+                    <a href="/superadmin/planos/" class="btn btn-outline-success btn-lg">
+                        <i class="fas fa-tags me-2"></i>
+                        Configurar Planos
+                    </a>
+                    <a href="/superadmin/relatorios/" class="btn btn-outline-info btn-lg">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Ver Relatórios
+                    </a>
+                    <a href="/superadmin/configuracoes/" class="btn btn-outline-warning btn-lg">
+                        <i class="fas fa-cogs me-2"></i>
+                        Configurações do Sistema
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alertas e Notificações -->
+{% if alertas %}
+<div class="row">
+    <div class="col-12">
+        <div class="card card-superadmin border-left-warning">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Alertas do Sistema
+                </h6>
+            </div>
+            <div class="card-body">
+                {% for alerta in alertas %}
+                    <div class="alert alert-{{ alerta.tipo }} alert-dismissible fade show" role="alert">
+                        <strong>{{ alerta.titulo }}</strong> {{ alerta.mensagem }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.border-left-primary {
+    border-left: 4px solid var(--superadmin-primary) !important;
+}
+.border-left-success {
+    border-left: 4px solid #28a745 !important;
+}
+.border-left-warning {
+    border-left: 4px solid #ffc107 !important;
+}
+.border-left-info {
+    border-left: 4px solid #17a2b8 !important;
+}
+</style>
+{% endblock %}

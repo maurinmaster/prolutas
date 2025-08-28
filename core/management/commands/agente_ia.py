@@ -19,12 +19,18 @@ from core.models import Academia, Aluno, Fatura, Assinatura
 class Command(BaseCommand):
     help = 'Executa o agente de IA para uma análise completa da academia, envia notificações e gera um relatório.'
 
+    def add_arguments(self, parser):
+        # Adiciona um argumento obrigatório: o ID da academia
+        parser.add_argument('academia_id', type=int, help='O ID da academia a ser analisada.')
+
     def handle(self, *args, **options):
         self.stdout.write(self.style.SUCCESS("--- 🤖 Agente Assistente iniciando varredura... ---"))
         
-        academia = Academia.objects.first()
-        if not academia:
-            self.stdout.write(self.style.ERROR("Nenhuma academia encontrada para analisar."))
+        academia_id = options['academia_id']
+        try:
+            academia = Academia.objects.get(pk=academia_id)
+        except Academia.DoesNotExist:
+            self.stdout.write(self.style.ERROR(f"Academia com ID {academia_id} não encontrada."))
             return
 
         self.stdout.write(f"Analisando dados para a academia: {academia.nome_fantasia}")
@@ -44,18 +50,19 @@ class Command(BaseCommand):
         # 2.1 Notificação de Inadimplência
         if academia.notificar_inadimplencia and inadimplentes_nomes:
             self.stdout.write("-> Verificando inadimplentes...")
-            for nome in inadimplentes_nomes:
-                try:
-                    aluno_obj = Aluno.objects.get(academia=academia, nome_completo__icontains=nome)
-                    # VERIFICAÇÃO DE PERMISSÃO
-                    if aluno_obj.contato and aluno_obj.receber_notificacoes:
-                        mensagem = f"Olá {aluno_obj.nome_completo.split()[0]}! Passando para lembrar que sua mensalidade na {academia.nome_fantasia} está em aberto. Se precisar de ajuda, é só chamar! 😊"
-                        enviar_mensagem_whatsapp(academia, aluno_obj.contato, mensagem, tipo='inadimplencia')
-                        self.stdout.write(self.style.SUCCESS(f"   - Ordem de envio de cobrança para {aluno_obj.nome_completo}"))
-                    elif not aluno_obj.receber_notificacoes:
-                        self.stdout.write(f"   - Aluno {aluno_obj.nome_completo} optou por não receber notificações. Pulando.")
-                except (Aluno.DoesNotExist, Aluno.MultipleObjectsReturned):
-                    continue
+            # Otimização: Busca todos os alunos inadimplentes de uma só vez para evitar múltiplas queries.
+            alunos_inadimplentes = Aluno.objects.filter(
+                academia=academia,
+                nome_completo__in=inadimplentes_nomes
+            )
+            for aluno in alunos_inadimplentes:
+                # VERIFICAÇÃO DE PERMISSÃO
+                if aluno.contato and aluno.receber_notificacoes:
+                    mensagem = f"Olá {aluno.nome_completo.split()[0]}! Passando para lembrar que sua mensalidade na {academia.nome_fantasia} está em aberto. Se precisar de ajuda, é só chamar! 😊"
+                    enviar_mensagem_whatsapp(academia, aluno, mensagem, tipo='inadimplencia')
+                    self.stdout.write(self.style.SUCCESS(f"   - Ordem de envio de cobrança para {aluno.nome_completo}"))
+                elif not aluno.receber_notificacoes:
+                    self.stdout.write(f"   - Aluno {aluno.nome_completo} optou por não receber notificações. Pulando.")
 
         # 2.2 Notificação de Faltas
         if academia.notificar_faltas and alunos_faltosos:
@@ -64,7 +71,7 @@ class Command(BaseCommand):
                 # VERIFICAÇÃO DE PERMISSÃO
                 if aluno.contato and aluno.receber_notificacoes:
                     mensagem = f"Olá {aluno.nome_completo.split()[0]}, tudo bem? Sentimos sua falta nos treinos da {academia.nome_fantasia}! 💪 Esperamos te ver em breve!"
-                    enviar_mensagem_whatsapp(academia, aluno.contato, mensagem, tipo='baixa_frequencia')
+                    enviar_mensagem_whatsapp(academia, aluno, mensagem, tipo='baixa_frequencia')
                     self.stdout.write(self.style.SUCCESS(f"   - Ordem de envio de ausência para {aluno.nome_completo}"))
                 elif not aluno.receber_notificacoes:
                     self.stdout.write(f"   - Aluno {aluno.nome_completo} optou por não receber notificações. Pulando.")
@@ -76,7 +83,7 @@ class Command(BaseCommand):
                 # VERIFICAÇÃO DE PERMISSÃO
                 if aluno.contato and aluno.receber_notificacoes:
                     mensagem = f"Seja muito bem-vindo(a) à {academia.nome_fantasia}, {aluno.nome_completo.split()[0]}! 🎉 Estamos muito felizes em ter você no nosso time. Bons treinos!"
-                    enviar_mensagem_whatsapp(academia, aluno.contato, mensagem, tipo='boas_vindas')
+                    enviar_mensagem_whatsapp(academia, aluno, mensagem, tipo='boas_vindas')
                     self.stdout.write(self.style.SUCCESS(f"   - Ordem de envio de boas-vindas para {aluno.nome_completo}"))
                 elif not aluno.receber_notificacoes:
                     self.stdout.write(f"   - Aluno {aluno.nome_completo} optou por não receber notificações. Pulando.")

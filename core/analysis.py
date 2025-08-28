@@ -100,9 +100,19 @@ def get_alunos_ausentes_recentemente(academia: Academia, dias: int = 3):
     
     return list(alunos_ausentes.values_list('nome_completo', flat=True))
 
+def get_alunos_inadimplentes(academia: Academia):
+    """Retorna uma lista com os nomes de todos os alunos com faturas vencidas e não pagas."""
+    hoje = datetime.date.today()
+    alunos = Aluno.objects.filter(
+        academia=academia, ativo=True,
+        assinaturas__faturas__data_pagamento__isnull=True,
+        assinaturas__faturas__data_vencimento__lt=hoje
+    ).distinct().values_list('nome_completo', flat=True)
+    return list(alunos)
+
 
 @tool
-def get_alunos_inadimplentes(academia_id: int):
+def get_alunos_inadimplentes_tool(academia_id: int):
     """Retorna uma lista com os nomes de todos os alunos com faturas vencidas e não pagas."""
     from .models import Academia
     try:

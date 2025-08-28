@@ -1,0 +1,287 @@
+{% extends 'superadmin/base.html' %}
+{% load static %}
+
+{% block title %}Relatórios - SuperAdmin ProLutas{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Relatórios do Sistema
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Filtros de Período -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <label for="startDate" class="form-label">Data Inicial</label>
+                            <input type="date" class="form-control" id="startDate">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="endDate" class="form-label">Data Final</label>
+                            <input type="date" class="form-control" id="endDate">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="reportType" class="form-label">Tipo de Relatório</label>
+                            <select class="form-select" id="reportType">
+                                <option value="financial">Financeiro</option>
+                                <option value="academies">Academias</option>
+                                <option value="subscriptions">Assinaturas</option>
+                                <option value="users">Usuários</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn btn-primary" onclick="generateReport()">
+                                <i class="fas fa-chart-line"></i> Gerar Relatório
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Cards de Resumo -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="card-title">Receita Total</h6>
+                                            <h4 class="mb-0">R$ 45.230,00</h4>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-dollar-sign fa-2x"></i>
+                                        </div>
+                                    </div>
+                                    <small class="text-light">+12% em relação ao mês anterior</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="card-title">Academias Ativas</h6>
+                                            <h4 class="mb-0">127</h4>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-dumbbell fa-2x"></i>
+                                        </div>
+                                    </div>
+                                    <small class="text-light">+8 novas este mês</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="card-title">Assinaturas</h6>
+                                            <h4 class="mb-0">342</h4>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-credit-card fa-2x"></i>
+                                        </div>
+                                    </div>
+                                    <small class="text-light">Taxa de conversão: 85%</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="card-title">Churn Rate</h6>
+                                            <h4 class="mb-0">3.2%</h4>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-chart-line-down fa-2x"></i>
+                                        </div>
+                                    </div>
+                                    <small class="text-light">-0.5% em relação ao mês anterior</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gráficos -->
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Receita Mensal</h6>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="revenueChart" height="100"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Distribuição por Plano</h6>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="plansChart" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabela de Dados -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">Detalhamento por Academia</h6>
+                                    <div>
+                                        <button class="btn btn-outline-success btn-sm" onclick="exportToExcel()">
+                                            <i class="fas fa-file-excel"></i> Excel
+                                        </button>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="exportToPDF()">
+                                            <i class="fas fa-file-pdf"></i> PDF
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Academia</th>
+                                                    <th>Plano</th>
+                                                    <th>Receita Mensal</th>
+                                                    <th>Alunos</th>
+                                                    <th>Status</th>
+                                                    <th>Última Atividade</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Academia Champions</td>
+                                                    <td><span class="badge bg-success">Enterprise</span></td>
+                                                    <td>R$ 299,00</td>
+                                                    <td>150</td>
+                                                    <td><span class="badge bg-success">Ativo</span></td>
+                                                    <td>Hoje</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Fight Club SP</td>
+                                                    <td><span class="badge bg-primary">Profissional</span></td>
+                                                    <td>R$ 149,00</td>
+                                                    <td>85</td>
+                                                    <td><span class="badge bg-success">Ativo</span></td>
+                                                    <td>Ontem</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Muay Thai Center</td>
+                                                    <td><span class="badge bg-secondary">Básico</span></td>
+                                                    <td>R$ 79,00</td>
+                                                    <td>45</td>
+                                                    <td><span class="badge bg-warning">Trial</span></td>
+                                                    <td>2 dias atrás</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>BJJ Academy</td>
+                                                    <td><span class="badge bg-primary">Profissional</span></td>
+                                                    <td>R$ 149,00</td>
+                                                    <td>120</td>
+                                                    <td><span class="badge bg-success">Ativo</span></td>
+                                                    <td>Hoje</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Kickboxing Pro</td>
+                                                    <td><span class="badge bg-secondary">Básico</span></td>
+                                                    <td>R$ 79,00</td>
+                                                    <td>32</td>
+                                                    <td><span class="badge bg-danger">Suspenso</span></td>
+                                                    <td>1 semana atrás</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Gráfico de Receita
+const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+const revenueChart = new Chart(revenueCtx, {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago'],
+        datasets: [{
+            label: 'Receita (R$)',
+            data: [32000, 35000, 38000, 42000, 39000, 43000, 45000, 45230],
+            borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: 'rgba(75, 192, 192, 0.1)',
+            tension: 0.1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+
+// Gráfico de Planos
+const plansCtx = document.getElementById('plansChart').getContext('2d');
+const plansChart = new Chart(plansCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Básico', 'Profissional', 'Enterprise'],
+        datasets: [{
+            data: [45, 35, 20],
+            backgroundColor: [
+                '#6c757d',
+                '#0d6efd',
+                '#198754'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+
+function generateReport() {
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const reportType = document.getElementById('reportType').value;
+    
+    console.log('Gerando relatório:', { startDate, endDate, reportType });
+    alert('Relatório gerado com sucesso!');
+}
+
+function exportToExcel() {
+    console.log('Exportando para Excel...');
+    alert('Relatório exportado para Excel!');
+}
+
+function exportToPDF() {
+    console.log('Exportando para PDF...');
+    alert('Relatório exportado para PDF!');
+}
+
+// Definir datas padrão (último mês)
+const today = new Date();
+const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+
+document.getElementById('startDate').value = lastMonth.toISOString().split('T')[0];
+document.getElementById('endDate').value = today.toISOString().split('T')[0];
+</script>
+{% endblock %}

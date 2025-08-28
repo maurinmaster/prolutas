@@ -1,0 +1,85 @@
+{% extends 'core/saas/base_saas.html' %}
+{% load static %}
+
+{% block title %}Planos - ProLutas SaaS{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold text-primary">Escolha seu Plano</h1>
+        <p class="lead text-muted">Encontre o plano perfeito para sua academia</p>
+    </div>
+
+    <div class="row justify-content-center">
+        {% for plano in planos %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 {% if plano.destaque %}border-primary shadow-lg{% else %}border-light{% endif %}">
+                {% if plano.destaque %}
+                <div class="card-header bg-primary text-white text-center">
+                    <span class="badge bg-warning text-dark">MAIS POPULAR</span>
+                </div>
+                {% endif %}
+                
+                <div class="card-body text-center">
+                    <h3 class="card-title text-primary">{{ plano.nome }}</h3>
+                    <div class="mb-3">
+                        <span class="h2 text-success">R$ {{ plano.preco_mensal }}</span>
+                        <span class="text-muted">/mês</span>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted">ou R$ {{ plano.preco_anual }}/ano</small>
+                    </div>
+                    
+                    <p class="text-muted mb-4">{{ plano.descricao }}</p>
+                    
+                    <ul class="list-unstyled mb-4">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Até {{ plano.max_alunos }} alunos</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{{ plano.max_professores }} professores</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{{ plano.max_modalidades }} modalidades</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{{ plano.max_turmas }} turmas</li>
+                        
+                        {% if plano.integracao_whatsapp %}
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Integração WhatsApp</li>
+                        {% endif %}
+                        
+                        {% if plano.sistema_graduacao %}
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Sistema de Graduação</li>
+                        {% endif %}
+                        
+                        {% if plano.relatorios_avancados %}
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Relatórios Avançados</li>
+                        {% endif %}
+                        
+                        {% if plano.backup_automatico %}
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Backup Automático</li>
+                        {% endif %}
+                        
+                        {% if plano.suporte_prioritario %}
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Suporte Prioritário</li>
+                        {% endif %}
+                        
+                        {% if plano.api_acesso %}
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Acesso à API</li>
+                        {% endif %}
+                    </ul>
+                </div>
+                
+                <div class="card-footer bg-transparent">
+                    <a href="{% url 'cadastro_academia' %}?plano={{ plano.slug }}" 
+                       class="btn {% if plano.destaque %}btn-primary{% else %}btn-outline-primary{% endif %} w-100">
+                        Começar Agora
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="text-center mt-5">
+        <p class="text-muted">
+            <i class="fas fa-shield-alt me-2"></i>
+            30 dias de teste grátis • Cancele a qualquer momento • Suporte técnico incluído
+        </p>
+    </div>
+</div>
+{% endblock %}

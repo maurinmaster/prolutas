@@ -42,10 +42,10 @@
                 </div>
 
                 <div class="btn-group" role="group">
-                    <a href="{% url 'graduacao_edit' item.pk %}" class="btn btn-sm btn-outline-warning" title="Editar">
+                    <a href="{% url 'graduacao_edit' slug=request.academia.slug pk=item.pk %}" class="btn btn-sm btn-outline-warning" title="Editar">
                         <i class="bi bi-pencil-fill"></i>
                     </a>
-                    <form action="{% url 'deletar_graduacao' item.pk %}" method="post" onsubmit="return confirm('Tem certeza que deseja excluir esta graduação?');">
+                    <form action="{% url 'deletar_graduacao' slug=request.academia.slug pk=item.pk %}" method="post" onsubmit="return confirm('Tem certeza que deseja excluir esta graduação?');">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir"><i class="bi bi-trash"></i></button>
                     </form>

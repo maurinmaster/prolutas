@@ -24,7 +24,7 @@
                     {{ form|crispy }}
                     <div class="mt-3">
                         <button type="submit" class="btn btn-success">{{ tipo }}</button>
-                        <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancelar</a>
+                        <a href="/{{ request.academia_slug }}/dashboard/" class="btn btn-secondary">Cancelar</a>
                     </div>
                 </form>
             </div>

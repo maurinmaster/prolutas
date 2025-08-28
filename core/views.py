@@ -18,16 +18,11 @@ from .serializers import PerguntaIASerializer
 from core.analysis import enviar_mensagem_whatsapp
 
 #funções langchain
-from langchain.agents import create_tool_calling_agent
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain.agents import AgentExecutor
-from langchain.agents import create_tool_calling_agent
-from langchain.agents import AgentExecutor
-from langchain.agents import AgentExecutor
-from langchain.prompts import ChatPromptTemplate
 from langchain_core.messages import HumanMessage, AIMessage
 
 from . import analysis
+
 from .models import (
     Academia, Aluno, Turma, Horario, Modalidade, Professor, Presenca, DiaNaoLetivo,
     Plano, Assinatura, Fatura, Graduacao, ExameGraduacao, HistoricoGraduacao, InscricaoExame, LogMensagem
@@ -43,10 +38,25 @@ from .forms import (
 # CADASTRO E PÁGINAS PRINCIPAIS
 # -----------------------------------------------------------------------------
 
-@transaction.atomic
-def cadastro_academia(request):
+def pagina_inicial(request, slug=None):
+    """View para a página inicial"""
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        if slug:
+            return redirect('dashboard', slug=slug)
+        else:
+            # Se não há slug, redireciona para login_redirect que vai determinar a academia
+            return redirect('login_redirect')
+    else:
+        # Redireciona para o login
+        return redirect('login')
+
+@transaction.atomic
+def cadastro_academia(request, slug=None):
+    if request.user.is_authenticated:
+        if slug:
+            return redirect('dashboard', slug=slug)
+        else:
+            return redirect('login_redirect')
     
     if request.method == 'POST':
         form_user = CustomUserCreationForm(request.POST)
@@ -66,69 +76,52 @@ def cadastro_academia(request):
         'form_academia': form_academia
     })
 
-@login_required
-def dashboard(request):
-    try:
-        academia = request.user.academia_dono
-        alunos = Aluno.objects.filter(academia=academia)
-        turmas = Turma.objects.filter(academia=academia)
-        contexto = {
-            'academia': academia,
-            'alunos': alunos,
-            'turmas': turmas,
-        }
-    except Academia.DoesNotExist:
-        contexto = {'academia': None, 'alunos': [], 'turmas': []}
-    
-    return render(request, 'core/dashboard.html', contexto)
-
 # -----------------------------------------------------------------------------
 # CRUD DE ALUNOS
 # -----------------------------------------------------------------------------
 
 @login_required
-def aluno_add(request):
-    # A academia não é mais passada diretamente para o formulário na sua criação.
+def aluno_add(request, slug=None):
     if request.method == 'POST':
-        form = AlunoForm(request.POST, request.FILES) # Argumento 'academia' removido daqui.
+        form = AlunoForm(request.POST, request.FILES)
         if form.is_valid():
             aluno = form.save(commit=False)
-            # A associação com a academia é feita aqui, antes de salvar.
-            aluno.academia = request.user.academia_dono
+            # A academia é obtida automaticamente do middleware
+            aluno.academia = request.academia
             aluno.save()
-            return redirect('dashboard')
+            return redirect('dashboard', slug=request.academia.slug)
     else:
-        form = AlunoForm() # Argumento 'academia' removido daqui.
+        form = AlunoForm()
     return render(request, 'core/aluno_form.html', {'form': form, 'tipo': 'Adicionar'})
 
 
 @login_required
 def aluno_edit(request, pk):
-    aluno = get_object_or_404(Aluno, pk=pk, academia=request.user.academia_dono)
-    # A academia não é mais passada diretamente para o formulário na sua criação.
+    # O filtro por academia é automático através do TenantManager
+    aluno = get_object_or_404(Aluno, pk=pk)
     if request.method == 'POST':
-        form = AlunoForm(request.POST, request.FILES, instance=aluno) # Argumento 'academia' removido daqui.
+        form = AlunoForm(request.POST, request.FILES, instance=aluno)
         if form.is_valid():
             form.save()
-            return redirect('dashboard')
+            return redirect('dashboard', slug=aluno.academia.slug)
     else:
         form = AlunoForm(instance=aluno) # Argumento 'academia' removido daqui.
     return render(request, 'core/aluno_form.html', {'form': form, 'tipo': 'Editar'})
 
 @login_required
 def aluno_delete(request, pk):
-    aluno = get_object_or_404(Aluno, pk=pk, academia=request.user.academia_dono)
+    aluno = get_object_or_404(Aluno, pk=pk, academia=request.academia)
     if request.method == 'POST':
         aluno.delete()
-    return redirect('dashboard')
+    return redirect('dashboard', slug=aluno.academia.slug)
 
 # -----------------------------------------------------------------------------
 # CRUD DE TURMAS (COM FORMSETS)
 # -----------------------------------------------------------------------------
 
 @login_required
-def turma_add(request):
-    academia = request.user.academia_dono
+def turma_add(request, slug=None):
+    academia = request.academia
     HorarioFormSet = inlineformset_factory(Turma, Horario, form=HorarioForm, extra=1, can_delete=False)
     if request.method == 'POST':
         form = TurmaForm(request.POST, academia=academia)
@@ -140,7 +133,7 @@ def turma_add(request):
             form.save_m2m()
             formset.instance = turma
             formset.save()
-            return redirect('dashboard')
+            return redirect('dashboard', slug=academia.slug)
     else:
         form = TurmaForm(academia=academia)
         formset = HorarioFormSet()
@@ -149,35 +142,35 @@ def turma_add(request):
 
 @login_required
 def turma_edit(request, pk):
-    turma = get_object_or_404(Turma, pk=pk, academia=request.user.academia_dono)
+    turma = get_object_or_404(Turma, pk=pk, academia=request.academia)
     HorarioFormSet = inlineformset_factory(Turma, Horario, form=HorarioForm, extra=1, can_delete=True)
     if request.method == 'POST':
-        form = TurmaForm(request.POST, instance=turma, academia=request.user.academia_dono)
+        form = TurmaForm(request.POST, instance=turma, academia=request.academia)
         formset = HorarioFormSet(request.POST, instance=turma)
         if form.is_valid() and formset.is_valid():
             form.save()
             formset.save()
-            return redirect('dashboard')
+            return redirect('dashboard', slug=turma.academia.slug)
     else:
-        form = TurmaForm(instance=turma, academia=request.user.academia_dono)
+        form = TurmaForm(instance=turma, academia=request.academia)
         formset = HorarioFormSet(instance=turma)
     contexto = {'form': form, 'formset': formset, 'tipo': 'Editar'}
     return render(request, 'core/turma_form.html', contexto)
 
 @login_required
 def turma_delete(request, pk):
-    turma = get_object_or_404(Turma, pk=pk, academia=request.user.academia_dono)
+    turma = get_object_or_404(Turma, pk=pk, academia=request.academia)
     if request.method == 'POST':
         turma.delete()
-    return redirect('dashboard')
+    return redirect('dashboard', slug=turma.academia.slug)
 
 # -----------------------------------------------------------------------------
 # CONTROLE DE PRESENÇA
 # -----------------------------------------------------------------------------
 
 @login_required
-def pagina_presenca(request):
-    academia = request.user.academia_dono
+def pagina_presenca(request, slug=None):
+    academia = request.academia
     termo_busca = request.GET.get('q', '')
     alunos_ativos = Aluno.objects.filter(academia=academia, ativo=True)
     if termo_busca:
@@ -195,58 +188,20 @@ def pagina_presenca(request):
     return render(request, 'core/pagina_presenca.html', contexto)
 
 @login_required
-def marcar_presenca_geral(request, aluno_pk):
+def marcar_presenca_geral(request, aluno_pk, slug=None):
     if request.method == 'POST':
-        academia = request.user.academia_dono
+        academia = request.academia
         aluno = get_object_or_404(Aluno, pk=aluno_pk, academia=academia)
         Presenca.objects.get_or_create(academia=academia, aluno=aluno, data=date.today())
-    return redirect('pagina_presenca')
+    return redirect('pagina_presenca', slug=request.academia_slug)
 
 # -----------------------------------------------------------------------------
 # GESTÃO FINANCEIRA (ASSINATURAS E FATURAS)
 # -----------------------------------------------------------------------------
 
 @login_required
-def pagina_financeiro(request):
-    academia = request.user.academia_dono
-    alunos_ativos = Aluno.objects.filter(academia=academia, ativo=True).order_by('nome_completo')
-
-    for aluno in alunos_ativos:
-        assinatura_ativa = Assinatura.objects.filter(aluno=aluno, status='ativa').first()
-        aluno.assinatura_ativa = assinatura_ativa
-        
-        aluno.status_financeiro = "Sem Plano"
-        if assinatura_ativa:
-            faturas_pendentes = Fatura.objects.filter(
-                assinatura=assinatura_ativa, data_pagamento__isnull=True
-            ).order_by('data_vencimento')
-            
-            aluno.faturas_pendentes = faturas_pendentes
-            
-            if not faturas_pendentes.exists():
-                aluno.status_financeiro = "Em Dia"
-            else:
-                aluno.status_financeiro = "Pendente"
-                for fatura in faturas_pendentes:
-                    if fatura.status == "Vencida":
-                        aluno.status_financeiro = "Vencida"
-                        break
-    
-    # --- PONTO CRÍTICO DA CORREÇÃO ---
-    # Precisamos instanciar os formulários vazios e passá-los para o template
-    # para que os modais possam ser renderizados.
-    contexto = {
-        'alunos_list': alunos_ativos,
-        'assinatura_form': AssinaturaForm(academia=academia), # Essencial para o modal de criar assinatura
-        'pagamento_form': RegistrarPagamentoForm(),         # Essencial para o modal de registrar pagamento
-    }
-    # ------------------------------------
-    
-    return render(request, 'core/pagina_financeiro.html', contexto)
-
-@login_required
-def criar_assinatura(request, aluno_pk):
-    academia = request.user.academia_dono
+def criar_assinatura(request, aluno_pk, slug=None):
+    academia = request.academia
     aluno = get_object_or_404(Aluno, pk=aluno_pk, academia=academia)
 
     if request.method == 'POST':
@@ -301,12 +256,12 @@ def criar_assinatura(request, aluno_pk):
         else:
             messages.error(request, "Não foi possível criar a assinatura. Por favor, verifique os dados do formulário.")
             
-    return redirect('pagina_financeiro')
+    return redirect('pagina_financeiro', slug=request.academia.slug)
 
 
 @login_required
-def registrar_pagamento(request, fatura_pk):
-    academia = request.user.academia_dono
+def registrar_pagamento(request, fatura_pk, slug=None):
+    academia = request.academia
     fatura = get_object_or_404(Fatura, pk=fatura_pk, academia=academia)
     if request.method == 'POST':
         form = RegistrarPagamentoForm(request.POST, instance=fatura)
@@ -318,11 +273,11 @@ def registrar_pagamento(request, fatura_pk):
             # Adiciona uma mensagem de erro
             messages.error(request, "Não foi possível registrar o pagamento. Por favor, selecione uma data válida.")
             
-    return redirect('pagina_financeiro')
+    return redirect('pagina_financeiro', slug=request.academia.slug)
 
 @login_required
-def alterar_vencimento_fatura(request, fatura_pk):
-    academia = request.user.academia_dono
+def alterar_vencimento_fatura(request, fatura_pk, slug=None):
+    academia = request.academia
     fatura = get_object_or_404(Fatura, pk=fatura_pk, academia=academia)
     if request.method == 'POST':
         form = AlterarVencimentoForm(request.POST, instance=fatura)
@@ -331,12 +286,12 @@ def alterar_vencimento_fatura(request, fatura_pk):
             messages.success(request, "Data de vencimento da fatura alterada com sucesso!")
         else:
             messages.error(request, "Não foi possível alterar a data. Por favor, verifique o valor informado.")
-    return redirect('pagina_financeiro')
+    return redirect('pagina_financeiro', slug=request.academia.slug)
 
 # ATENÇÃO: Lembre-se de passar o novo formulário para o contexto da pagina_financeiro
 @login_required
-def pagina_financeiro(request):
-    academia = request.user.academia_dono
+def pagina_financeiro(request, slug=None):
+    academia = request.academia
     
     # 1. A variável 'alunos_ativos' é definida AQUI, no início.
     alunos_ativos = Aluno.objects.filter(academia=academia, ativo=True).order_by('nome_completo')
@@ -375,8 +330,8 @@ def pagina_financeiro(request):
     return render(request, 'core/pagina_financeiro.html', contexto)
 
 @login_required
-def cancelar_assinatura(request, assinatura_pk):
-    academia = request.user.academia_dono
+def cancelar_assinatura(request, assinatura_pk, slug=None):
+    academia = request.academia
     assinatura = get_object_or_404(Assinatura, pk=assinatura_pk, academia=academia)
     
     if request.method == 'POST':
@@ -384,15 +339,15 @@ def cancelar_assinatura(request, assinatura_pk):
         assinatura.save()
         messages.warning(request, f"A assinatura do aluno {assinatura.aluno.nome_completo} foi cancelada.")
         
-    return redirect('pagina_financeiro')
+    return redirect('pagina_financeiro', slug=request.academia.slug)
 
 # -----------------------------------------------------------------------------
 # CADASTROS AUXILIARES (Planos, Modalidades, etc.)
 # -----------------------------------------------------------------------------
 
 @login_required
-def gerenciar_cadastros(request):
-    academia = request.user.academia_dono
+def gerenciar_cadastros(request, slug=None):
+    academia = request.academia
     if request.method == 'POST':
         if 'submit_modalidade' in request.POST:
             modalidade_form = ModalidadeForm(request.POST)
@@ -400,14 +355,14 @@ def gerenciar_cadastros(request):
                 modalidade = modalidade_form.save(commit=False)
                 modalidade.academia = academia
                 modalidade.save()
-                return redirect('gerenciar_cadastros')
+                return redirect('gerenciar_cadastros', slug=request.academia.slug)
         elif 'submit_professor' in request.POST:
             professor_form = ProfessorForm(request.POST)
             if professor_form.is_valid():
                 professor = professor_form.save(commit=False)
                 professor.academia = academia
                 professor.save()
-                return redirect('gerenciar_cadastros')
+                return redirect('gerenciar_cadastros', slug=request.academia.slug)
     modalidade_form = ModalidadeForm()
     professor_form = ProfessorForm()
     modalidades = Modalidade.objects.filter(academia=academia)
@@ -417,26 +372,27 @@ def gerenciar_cadastros(request):
         'professor_form': professor_form,
         'modalidades': modalidades,
         'professores': professores,
+        'academia': academia,
     }
     return render(request, 'core/gerenciar_cadastros.html', contexto)
 
 @login_required
 def deletar_modalidade(request, pk):
-    item = get_object_or_404(Modalidade, pk=pk, academia=request.user.academia_dono)
+    item = get_object_or_404(Modalidade, pk=pk, academia=request.academia)
     if request.method == 'POST':
         item.delete()
-    return redirect('gerenciar_cadastros')
+    return redirect('gerenciar_cadastros', slug=request.academia.slug)
 
 @login_required
 def deletar_professor(request, pk):
-    item = get_object_or_404(Professor, pk=pk, academia=request.user.academia_dono)
+    item = get_object_or_404(Professor, pk=pk, academia=request.academia)
     if request.method == 'POST':
         item.delete()
-    return redirect('gerenciar_cadastros')
+    return redirect('gerenciar_cadastros', slug=request.academia.slug)
 
 @login_required
-def gerenciar_planos(request):
-    academia = request.user.academia_dono
+def gerenciar_planos(request, slug=None):
+    academia = request.academia
     if request.method == 'POST':
         form = PlanoForm(request.POST)
         if form.is_valid():
@@ -447,26 +403,26 @@ def gerenciar_planos(request):
     else:
         form = PlanoForm()
     planos = Plano.objects.filter(academia=academia)
-    contexto = {'form': form, 'planos': planos}
+    contexto = {'form': form, 'planos': planos, 'academia': academia}
     return render(request, 'core/gerenciar_planos.html', contexto)
 
 @login_required
 def deletar_plano(request, pk):
-    plano = get_object_or_404(Plano, pk=pk, academia=request.user.academia_dono)
+    plano = get_object_or_404(Plano, pk=pk, academia=request.academia)
     if request.method == 'POST':
         plano.delete()
-    return redirect('gerenciar_planos')
+    return redirect('gerenciar_planos', slug=request.academia.slug)
 
 @login_required
-def gerenciar_dias_nao_letivos(request):
-    academia = request.user.academia_dono
+def gerenciar_dias_nao_letivos(request, slug=None):
+    academia = request.academia
     if request.method == 'POST':
         form = DiaNaoLetivoForm(request.POST)
         if form.is_valid():
             dia_nao_letivo = form.save(commit=False)
             dia_nao_letivo.academia = academia
             dia_nao_letivo.save()
-            return redirect('gerenciar_dias_nao_letivos')
+            return redirect('gerenciar_dias_nao_letivos', slug=request.academia.slug)
     else:
         form = DiaNaoLetivoForm()
     dias_cadastrados = DiaNaoLetivo.objects.filter(academia=academia)
@@ -475,37 +431,31 @@ def gerenciar_dias_nao_letivos(request):
 
 @login_required
 def deletar_dia_nao_letivo(request, pk):
-    dia = get_object_or_404(DiaNaoLetivo, pk=pk, academia=request.user.academia_dono)
+    dia = get_object_or_404(DiaNaoLetivo, pk=pk, academia=request.academia)
     if request.method == 'POST':
         dia.delete()
-    return redirect('gerenciar_dias_nao_letivos')
+    return redirect('gerenciar_dias_nao_letivos', slug=request.academia.slug)
 
 @login_required
-def dashboard(request):
-    try:
-        academia = request.user.academia_dono
-        
-        # --- INÍCIO DA NOVA LÓGICA ---
-        # Chama as funções de análise para obter os KPIs
-        dados_financeiros = analysis.analisar_financeiro(academia)
-        alunos_risco_evasao = analysis.analisar_frequencia(academia)
-        
-        # Dados para as listas normais
-        alunos = Aluno.objects.filter(academia=academia)
-        turmas = Turma.objects.filter(academia=academia)
-        
-        contexto = {
-            'academia': academia,
-            'alunos': alunos,
-            'turmas': turmas,
-            # Passa os novos dados da análise para o template
-            'kpis_financeiros': dados_financeiros,
-            'alunos_em_risco': alunos_risco_evasao,
-        }
-        # --- FIM DA NOVA LÓGICA ---
-
-    except Academia.DoesNotExist:
-        contexto = {'academia': None, 'alunos': [], 'turmas': [], 'kpis_financeiros': None, 'alunos_em_risco': []}
+def dashboard(request, slug=None):
+    # A academia é obtida automaticamente do middleware
+    academia = request.academia
+    
+    # Chama as funções de análise para obter os KPIs
+    dados_financeiros = analysis.analisar_financeiro(academia)
+    alunos_risco_evasao = analysis.analisar_frequencia(academia)
+    
+    # Os dados são filtrados automaticamente pelo TenantManager
+    alunos = Aluno.objects.all()
+    turmas = Turma.objects.all()
+    
+    contexto = {
+        'academia': academia,
+        'alunos': alunos,
+        'turmas': turmas,
+        'kpis_financeiros': dados_financeiros,
+        'alunos_em_risco': alunos_risco_evasao,
+    }
     
     return render(request, 'core/dashboard.html', contexto)
 
@@ -517,15 +467,22 @@ class AgenteIAAPIView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         pergunta = serializer.validated_data['question']
-        academia = request.user.academia_dono
+        academia = request.academia
         
         try:
+            resposta_ia = ""
             # --- LÓGICA PARA O RESUMO INICIAL ---
             if pergunta == '__INITIAL_SUMMARY__':
                 # 1. Coleta todos os dados para o resumo
                 dados_financeiros = analysis.analisar_financeiro(academia)
                 status_alunos = analysis.get_contagem_status_alunos(academia)
-                inadimplentes = analysis.get_alunos_inadimplentes.invoke({"academia_id": academia.id})
+                # Busca alunos inadimplentes diretamente
+                hoje = date.today()
+                inadimplentes = Aluno.objects.filter(
+                    academia=academia, ativo=True,
+                    assinaturas__faturas__data_pagamento__isnull=True,
+                    assinaturas__faturas__data_vencimento__lt=hoje
+                ).distinct().values_list('nome_completo', flat=True)
                 sem_assinatura = analysis.get_contagem_alunos_sem_assinatura(academia)
                 ausentes = analysis.get_alunos_ausentes_recentemente(academia, dias=3)
 
@@ -561,39 +518,9 @@ Atenciosamente,
 
 {nome_assistente} - {cargo_assistente}
 """
-            # --- LÓGICA PARA PERGUNTAS NORMAIS (LANGCHAIN) ---
-            else:
-                session_chat_history = request.session.get('lc_chat_history', [])
-                llm = ChatGoogleGenerativeAI(
-                    model="gemini-1.5-flash",
-                    temperature=0,
-                    google_api_key=os.getenv("GEMINI_API_KEY")
-                )
-                tools = [
-                    analysis.get_alunos_inadimplentes,
-                    analysis.get_detalhes_aluno,
-                    analysis.get_contagem_total_alunos,
-                    analysis.get_planos_cadastrados,
-                    analysis.get_nivel_inadimplencia,
-                    analysis.get_aluno_mais_faltoso,
-                    analysis.get_historico_pagamentos_aluno,
-                ]
-                prompt = ChatPromptTemplate.from_messages([
-                    ("system", "Você é um assistente prestativo da academia. Use as ferramentas disponíveis para obter informações do sistema. Seja sempre direto e claro nas respostas."),
-                    *[AIMessage(content=msg['content']) if msg['type'] == 'ai' else HumanMessage(content=msg['content']) for msg in session_chat_history],
-                    ("human", "{input}"),
-                    ("placeholder", "{agent_scratchpad}"),
-                ])
-                agent = create_tool_calling_agent(llm, tools, prompt)
-                agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
-                response = agent_executor.invoke({"input": f"academia_id={academia.id}; {pergunta}"})
-                resposta_ia = response['output']
-                #... (atualiza histórico, etc.)
-
-            # --- GERAÇÃO DA RESPOSTA COM LANGCHAIN ---
-            if pergunta == '__INITIAL_SUMMARY__':
+                # Geração da resposta para o resumo inicial
                 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-                if GEMINI_API_KEY:
+                if GEMINI_API_KEY and GEMINI_API_KEY != "YOUR_GEMINI_API_KEY":
                     try:
                         model = ChatGoogleGenerativeAI(
                             model="gemini-1.5-flash",
@@ -603,15 +530,140 @@ Atenciosamente,
                         response = model.invoke([HumanMessage(content=prompt)])
                         resposta_ia = response.content
                     except Exception as e:
+                        print(f"Erro ao processar com IA: {str(e)}")
                         resposta_ia = f"Erro ao processar com IA: {str(e)}"
                 else:
-                    resposta_ia = "API Key do Gemini não configurada."
+                    print("API Key do Gemini não configurada ou é o valor padrão.")
+                    # Resposta padrão quando a API Key não está configurada
+                    resposta_ia = f"""
+**Boletim Diário - {data_hoje}**
+
+Olá {nome_dono}!
+
+Tudo em ordem por aqui! 😄
+
+{contexto_resumo}
+
+Acompanharemos de perto a situação da inadimplência e as ausências para mantermos nossa ótima taxa de alunos ativos.
+
+Qualquer dúvida, pode me chamar! 😊
+
+Atenciosamente,
+
+{nome_assistente} - {cargo_assistente}
+
+---
+*Nota: Esta é uma resposta padrão. Para respostas personalizadas com IA, configure a variável de ambiente GEMINI_API_KEY.*
+"""
+            # --- LÓGICA PARA PERGUNTAS NORMAIS (LANGCHAIN) ---
+            else:
+                session_chat_history = request.session.get('lc_chat_history', [])
+                GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+                
+                if GEMINI_API_KEY and GEMINI_API_KEY != "YOUR_GEMINI_API_KEY":
+                    try:
+                        # Configura o LLM
+                        llm = ChatGoogleGenerativeAI(
+                            model="gemini-1.5-flash",
+                            temperature=0,
+                            google_api_key=GEMINI_API_KEY
+                        )
+                        
+                        # Analisa a pergunta e busca dados específicos
+                        pergunta_lower = pergunta.lower()
+                        
+                        if "inadimplentes" in pergunta_lower or "inadimplência" in pergunta_lower:
+                            # Busca alunos inadimplentes
+                            hoje = date.today()
+                            inadimplentes = Aluno.objects.filter(
+                                academia=academia, ativo=True,
+                                assinaturas__faturas__data_pagamento__isnull=True,
+                                assinaturas__faturas__data_vencimento__lt=hoje
+                            ).distinct().values_list('nome_completo', flat=True)
+                            
+                            if inadimplentes:
+                                resposta_ia = f"Alunos inadimplentes na {academia.nome_fantasia}:\n\n" + "\n".join([f"• {nome}" for nome in inadimplentes])
+                            else:
+                                resposta_ia = f"Ótima notícia! Não há alunos inadimplentes na {academia.nome_fantasia}."
+                                
+                        elif "faltoso" in pergunta_lower or "frequência" in pergunta_lower or "presença" in pergunta_lower:
+                            # Busca aluno mais faltoso
+                            data_limite = date.today() - timedelta(days=30)
+                            alunos_ativos = Aluno.objects.filter(academia=academia, ativo=True)
+                            
+                            if alunos_ativos.exists():
+                                alunos_com_presencas = alunos_ativos.annotate(
+                                    presencas_recentes=Count('presencas', filter=Q(presencas__data__gte=data_limite))
+                                ).order_by('presencas_recentes')
+                                
+                                aluno_mais_faltoso = alunos_com_presencas.first()
+                                if aluno_mais_faltoso:
+                                    resposta_ia = f"O aluno com menos presenças nos últimos 30 dias é {aluno_mais_faltoso.nome_completo}, com {aluno_mais_faltoso.presencas_recentes} presenças."
+                                else:
+                                    resposta_ia = "Não foi possível determinar o aluno mais faltoso."
+                            else:
+                                resposta_ia = "Não há alunos ativos cadastrados."
+                                
+                        elif "quantos alunos" in pergunta_lower or "total de alunos" in pergunta_lower:
+                            # Conta alunos ativos
+                            total_ativos = Aluno.objects.filter(academia=academia, ativo=True).count()
+                            total_inativos = Aluno.objects.filter(academia=academia, ativo=False).count()
+                            
+                            resposta_ia = f"Na {academia.nome_fantasia} você tem:\n• {total_ativos} alunos ativos\n• {total_inativos} alunos inativos\n• Total: {total_ativos + total_inativos} alunos"
+                            
+                        elif "planos" in pergunta_lower:
+                            # Lista planos
+                            planos = Plano.objects.filter(academia=academia)
+                            if planos.exists():
+                                resposta_ia = f"Planos disponíveis na {academia.nome_fantasia}:\n\n" + "\n".join([f"• {plano.nome}: R$ {plano.valor}" for plano in planos])
+                            else:
+                                resposta_ia = "Nenhum plano cadastrado ainda."
+                                
+                        elif "nível de inadimplência" in pergunta_lower or "valor inadimplência" in pergunta_lower:
+                            # Calcula inadimplência
+                            hoje = date.today()
+                            total_vencido = Fatura.objects.filter(
+                                academia=academia,
+                                data_pagamento__isnull=True,
+                                data_vencimento__lt=hoje
+                            ).aggregate(total=Sum('valor'))['total'] or 0
+                            
+                            resposta_ia = f"O valor total de faturas vencidas e não pagas na {academia.nome_fantasia} é de R$ {total_vencido:.2f}."
+                            
+                        else:
+                            # Para outras perguntas, usa o LLM
+                            prompt_text = f"""
+Você é um assistente virtual especializado em gestão de academias de artes marciais.
+Academia: {academia.nome_fantasia}
+
+Com base na pergunta do usuário, forneça uma resposta útil e detalhada.
+Se a pergunta for sobre dados específicos da academia, informe que essas funcionalidades estão sendo implementadas.
+
+Pergunta do usuário: {pergunta}
+
+Responda de forma cordial e profissional.
+"""
+                            
+                            # Executa a pergunta diretamente com o LLM
+                            response = llm.invoke([HumanMessage(content=prompt_text)])
+                            resposta_ia = response.content
+                        
+                    except Exception as e:
+                        print(f"Erro ao processar pergunta normal: {str(e)}")
+                        resposta_ia = f"Desculpe, ocorreu um erro ao processar sua pergunta: {str(e)}. Por favor, tente novamente."
+                else:
+                    print("API Key do Gemini não configurada para perguntas normais.")
+                    resposta_ia = "Desculpe, a funcionalidade de perguntas normais ainda está em desenvolvimento. Para respostas personalizadas com IA, configure a variável de ambiente GEMINI_API_KEY."
 
             # Define as sugestões de menu para o frontend
             sugestoes = [
                 "Quem são os alunos inadimplentes?",
                 "Qual o aluno mais faltoso?",
                 "Listar meus planos",
+                "Quantos alunos ativos tenho?",
+                "Qual o nível de inadimplência?",
+                "Detalhes do aluno João Silva",
+                "Histórico de pagamentos do aluno Maria Santos",
             ]
 
             return Response({'answer': resposta_ia, 'suggestions': sugestoes}, status=status.HTTP_200_OK)
@@ -624,14 +676,14 @@ Atenciosamente,
             )
 
 @login_required
-def configuracao_whatsapp(request):
-    academia = request.user.academia_dono
+def configuracao_whatsapp(request, slug=None):
+    academia = request.academia
     if request.method == 'POST':
         form = ConfiguracaoWhatsAppForm(request.POST, instance=academia)
         if form.is_valid():
             form.save()
             messages.success(request, "Configurações do WhatsApp salvas com sucesso!")
-            return redirect('configuracao_whatsapp')
+            return redirect('configuracao_whatsapp', slug=request.academia.slug)
     else:
         form = ConfiguracaoWhatsAppForm(instance=academia)
 
@@ -641,30 +693,27 @@ def configuracao_whatsapp(request):
     return render(request, 'core/configuracao_whatsapp.html', contexto)
 
 @login_required
-def whatsapp_conexao(request):
+def whatsapp_conexao(request, slug=None):
     # Esta view apenas precisa renderizar o template.
     # Passamos o ID da academia para que o JavaScript saiba qual cliente gerenciar.
-    academia = request.user.academia_dono
+    academia = request.academia
     contexto = {
         'academia_id': academia.id
     }
     return render(request, 'core/whatsapp_conexao.html', contexto)
 
 @login_required
-def relatorio_frequencia(request):
-    academia = request.user.academia_dono
+def relatorio_frequencia(request, slug=None):
+    academia = request.academia
     
     # --- Lógica dos Filtros (CORRIGIDA) ---
     data_fim = date.today()
     data_inicio = data_fim - timedelta(days=30)
     
     if request.GET.get('data_inicio'):
-        # We need the full datetime module here to use strptime
-        import datetime 
-        data_inicio = datetime.datetime.strptime(request.GET.get('data_inicio'), '%Y-%m-%d').date()
+        data_inicio = datetime.strptime(request.GET.get('data_inicio'), '%Y-%m-%d').date()
     if request.GET.get('data_fim'):
-        import datetime
-        data_fim = datetime.datetime.strptime(request.GET.get('data_fim'), '%Y-%m-%d').date()
+        data_fim = datetime.strptime(request.GET.get('data_fim'), '%Y-%m-%d').date()
         
     turma_selecionada_id = request.GET.get('turma')
 
@@ -693,8 +742,8 @@ def relatorio_frequencia(request):
     return render(request, 'core/relatorio_frequencia.html', contexto)
 
 @login_required
-def relatorio_financeiro(request):
-    academia = request.user.academia_dono
+def relatorio_financeiro(request, slug=None):
+    academia = request.academia
     hoje = date.today()
 
     # --- Lógica dos Filtros ---
@@ -703,9 +752,9 @@ def relatorio_financeiro(request):
     data_fim = hoje
 
     if request.GET.get('data_inicio'):
-        data_inicio = datetime.datetime.strptime(request.GET.get('data_inicio'), '%Y-%m-%d').date()
+        data_inicio = datetime.strptime(request.GET.get('data_inicio'), '%Y-%m-%d').date()
     if request.GET.get('data_fim'):
-        data_fim = datetime.datetime.strptime(request.GET.get('data_fim'), '%Y-%m-%d').date()
+        data_fim = datetime.strptime(request.GET.get('data_fim'), '%Y-%m-%d').date()
 
     status_filtro = request.GET.get('status')
     plano_filtro_id = request.GET.get('plano')
@@ -756,8 +805,8 @@ def relatorio_financeiro(request):
     return render(request, 'core/relatorio_financeiro.html', contexto)
 
 @login_required
-def gerenciar_graduacoes(request):
-    academia = request.user.academia_dono
+def gerenciar_graduacoes(request, slug=None):
+    academia = request.academia
 
     if request.method == 'POST':
         form = GraduacaoForm(request.POST, academia=academia)
@@ -766,7 +815,7 @@ def gerenciar_graduacoes(request):
             graduacao.academia = academia
             graduacao.save()
             messages.success(request, "Nova graduação adicionada com sucesso!")
-            return redirect('gerenciar_graduacoes')
+            return redirect('gerenciar_graduacoes', slug=request.academia.slug)
     else:
         form = GraduacaoForm(academia=academia)
 
@@ -779,8 +828,8 @@ def gerenciar_graduacoes(request):
     return render(request, 'core/gerenciar_graduacoes.html', contexto)
 
 @login_required
-def graduacao_edit(request, pk):
-    academia = request.user.academia_dono
+def graduacao_edit(request, pk, slug=None):
+    academia = request.academia
     # Busca a graduação específica que queremos editar, garantindo que pertence à academia do usuário.
     graduacao = get_object_or_404(Graduacao, pk=pk, academia=academia)
 
@@ -790,7 +839,7 @@ def graduacao_edit(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, f"Graduação '{graduacao.nome}' atualizada com sucesso!")
-            return redirect('gerenciar_graduacoes')
+            return redirect('gerenciar_graduacoes', slug=request.academia.slug)
     else:
         # Preenche o formulário com os dados atuais da graduação para exibição
         form = GraduacaoForm(instance=graduacao, academia=academia)
@@ -803,19 +852,19 @@ def graduacao_edit(request, pk):
     return render(request, 'core/gerenciar_graduacoes_edit.html', contexto)
 
 @login_required
-def deletar_graduacao(request, pk):
-    graduacao = get_object_or_404(Graduacao, pk=pk, academia=request.user.academia_dono)
+def deletar_graduacao(request, pk, slug=None):
+    graduacao = get_object_or_404(Graduacao, pk=pk, academia=request.academia)
     if request.method == 'POST':
         try:
             graduacao.delete()
             messages.success(request, "Graduação removida com sucesso.")
         except models.ProtectedError:
             messages.error(request, "Esta graduação não pode ser removida pois já está associada a um ou mais alunos.")
-    return redirect('gerenciar_graduacoes')
+    return redirect('gerenciar_graduacoes', slug=request.academia.slug)
 
 @login_required
-def gerenciar_exames(request):
-    academia = request.user.academia_dono
+def gerenciar_exames(request, slug=None):
+    academia = request.academia
 
     if request.method == 'POST':
         form = ExameGraduacaoForm(request.POST, academia=academia)
@@ -824,7 +873,7 @@ def gerenciar_exames(request):
             exame.academia = academia
             exame.save()
             messages.success(request, "Novo exame agendado com sucesso!")
-            return redirect('gerenciar_exames')
+            return redirect('gerenciar_exames', slug=request.academia.slug)
     else:
         form = ExameGraduacaoForm(academia=academia)
 
@@ -836,8 +885,8 @@ def gerenciar_exames(request):
     return render(request, 'core/gerenciar_exames.html', contexto)
 
 @login_required
-def relatorio_alunos_aptos(request):
-    academia = request.user.academia_dono
+def relatorio_alunos_aptos(request, slug=None):
+    academia = request.academia
     alunos_ativos = Aluno.objects.filter(academia=academia, ativo=True)
 
     alunos_aptos = []
@@ -871,21 +920,7 @@ def relatorio_alunos_aptos(request):
 
 @login_required
 def aluno_detalhe(request, pk):
-    academia = request.user.academia_dono
-    aluno = get_object_or_404(Aluno, pk=pk, academia=academia)
-
-    # Busca o histórico de graduações para exibir na página
-    historico = HistoricoGraduacao.objects.filter(aluno=aluno).order_by('-data_promocao')
-
-    contexto = {
-        'aluno': aluno,
-        'historico': historico,
-    }
-    return render(request, 'core/aluno_detalhe.html', contexto)
-
-@login_required
-def aluno_detalhe(request, pk):
-    academia = request.user.academia_dono
+    academia = request.academia
     aluno = get_object_or_404(Aluno, pk=pk, academia=academia)
     
     # --- LÓGICA DE PROMOÇÃO DE ALUNO (PROCESSAMENTO DO FORMULÁRIO DO MODAL) ---
@@ -952,8 +987,8 @@ def aluno_detalhe(request, pk):
     return render(request, 'core/aluno_detalhe.html', contexto)
 
 @login_required
-def detalhe_exame(request, pk):
-    academia = request.user.academia_dono
+def detalhe_exame(request, pk, slug=None):
+    academia = request.academia
     exame = get_object_or_404(ExameGraduacao, pk=pk, academia=academia)
     
     # Busca todos os alunos já inscritos neste exame
@@ -1003,30 +1038,8 @@ def detalhe_exame(request, pk):
     return render(request, 'core/detalhe_exame.html', contexto)
 
 @login_required
-def convidar_alunos_exame(request, exame_pk):
-    exame = get_object_or_404(ExameGraduacao, pk=exame_pk)
-    if request.method == 'POST':
-        ids_alunos = request.POST.getlist('alunos_a_convidar')
-        graduacao_id = request.POST.get('graduacao_pretendida')
-        if not graduacao_id:
-            messages.error(request, "Você precisa selecionar a graduação do exame.")
-            return redirect('detalhe_exame', pk=exame.pk)
-
-        graduacao = get_object_or_404(Graduacao, pk=graduacao_id)
-        for aluno_id in ids_alunos:
-            aluno = get_object_or_404(Aluno, pk=aluno_id)
-            # Cria a inscrição com o status 'convidado'
-            InscricaoExame.objects.get_or_create(
-                exame=exame,
-                aluno=aluno,
-                defaults={'graduacao_pretendida': graduacao}
-            )
-        messages.success(request, f"{len(ids_alunos)} aluno(s) convidados com sucesso!")
-    return redirect('detalhe_exame', pk=exame.pk)
-
-@login_required
 def registrar_resultado_exame(request, inscricao_pk):
-    academia = request.user.academia_dono
+    academia = request.academia
     inscricao = get_object_or_404(InscricaoExame, pk=inscricao_pk, exame__academia=academia)
 
     if request.method == 'POST':
@@ -1065,7 +1078,7 @@ def registrar_resultado_exame(request, inscricao_pk):
 
 @login_required
 def convidar_alunos_exame(request, exame_pk):
-    academia = request.user.academia_dono
+    academia = request.academia
     exame = get_object_or_404(ExameGraduacao, pk=exame_pk, academia=academia)
 
     if request.method == 'POST':
@@ -1111,7 +1124,7 @@ def convidar_alunos_exame(request, exame_pk):
 
 @login_required
 def atualizar_status_inscricao(request, inscricao_pk, novo_status):
-    academia = request.user.academia_dono
+    academia = request.academia
     inscricao = get_object_or_404(InscricaoExame, pk=inscricao_pk, exame__academia=academia)
     
     if request.method == 'POST':
@@ -1136,7 +1149,7 @@ def atualizar_status_inscricao(request, inscricao_pk, novo_status):
                     f"Sua nova graduação é **{inscricao.graduacao_pretendida.nome}**.\n\n"
                     f"Continue se dedicando nos treinos. Estamos muito orgulhosos da sua jornada! Oss!"
                 )
-                enviar_mensagem_whatsapp(academia, aluno.contato, mensagem, tipo='aprovacao_exame')
+                enviar_mensagem_whatsapp(academia, aluno, mensagem, tipo='aprovacao_exame')
             # --- FIM DA LÓGICA DE NOTIFICAÇÃO ---
 
         else:
@@ -1145,8 +1158,8 @@ def atualizar_status_inscricao(request, inscricao_pk, novo_status):
     return redirect('detalhe_exame', pk=inscricao.exame.pk)
 
 @login_required
-def deletar_exame(request, pk):
-    academia = request.user.academia_dono
+def deletar_exame(request, pk, slug=None):
+    academia = request.academia
     # Busca o exame específico, garantindo que pertence à academia do usuário
     exame = get_object_or_404(ExameGraduacao, pk=pk, academia=academia)
     
@@ -1156,11 +1169,11 @@ def deletar_exame(request, pk):
         exame.delete()
         messages.success(request, "Exame removido com sucesso.")
         
-    return redirect('gerenciar_exames')
+    return redirect('gerenciar_exames', slug=request.academia.slug)
 
 @login_required
-def relatorio_mensagens(request):
-    academia = request.user.academia_dono
+def relatorio_mensagens(request, slug=None):
+    academia = request.academia
     
     # Começa com todos os logs da academia
     log_list = LogMensagem.objects.filter(academia=academia).select_related('aluno')
@@ -1182,7 +1195,7 @@ def relatorio_mensagens(request):
     
     if data_fim:
         # Adiciona um dia para incluir o dia final completo na busca
-        data_fim_ajustada = datetime.datetime.strptime(data_fim, '%Y-%m-%d').date() + timedelta(days=1)
+        data_fim_ajustada = datetime.strptime(data_fim, '%Y-%m-%d').date() + timedelta(days=1)
         log_list = log_list.filter(data_envio__lt=data_fim_ajustada)
 
     # --- Lógica da Paginação ---
@@ -1202,4 +1215,18 @@ def relatorio_mensagens(request):
         }
     }
     return render(request, 'core/relatorio_mensagens.html', contexto)
+
+def sem_academia(request, slug=None):
+    """ Página exibida quando o usuário não tem academia associada """
+    return render(request, 'core/sem_academia.html')
+
+@login_required
+def login_redirect(request, slug=None):
+    """View para redirecionar após login para o dashboard correto com slug"""
+    try:
+        # Busca a academia do usuário logado
+        academia = Academia.objects.get(dono=request.user, ativa=True)
+        return redirect('dashboard', slug=academia.slug)
+    except Academia.DoesNotExist:
+        return redirect('planos')
     

@@ -57,10 +57,10 @@
                                 <div class="mb-1">
                                     <small>Venc: {{ fatura.data_vencimento|date:"d/m/Y" }} - R$ {{ fatura.valor }}</small>
                                     <div class="btn-group btn-group-sm ms-2" role="group">
-                                        <button class="btn btn-outline-success py-0 px-1" data-bs-toggle="modal" data-bs-target="#registrarPagamentoModal" data-url="{% url 'registrar_pagamento' fatura.pk %}" data-aluno="{{ aluno.nome_completo }}" data-valor="{{ fatura.valor }}" data-vencimento="{{ fatura.data_vencimento|date:'d/m/Y' }}">
+                                        <button class="btn btn-outline-success py-0 px-1" data-bs-toggle="modal" data-bs-target="#registrarPagamentoModal" data-url="{% url 'registrar_pagamento' slug=request.academia.slug fatura_pk=fatura.pk %}" data-aluno="{{ aluno.nome_completo }}" data-valor="{{ fatura.valor }}" data-vencimento="{{ fatura.data_vencimento|date:'d/m/Y' }}">
                                             Pagar
                                         </button>
-                                        <button class="btn btn-outline-secondary py-0 px-1" data-bs-toggle="modal" data-bs-target="#alterarVencimentoModal" data-url="{% url 'alterar_vencimento_fatura' fatura.pk %}" data-vencimento-atual="{{ fatura.data_vencimento|date:'Y-m-d' }}">
+                                        <button class="btn btn-outline-secondary py-0 px-1" data-bs-toggle="modal" data-bs-target="#alterarVencimentoModal" data-url="{% url 'alterar_vencimento_fatura' slug=request.academia.slug fatura_pk=fatura.pk %}" data-vencimento-atual="{{ fatura.data_vencimento|date:'Y-m-d' }}">
                                             Alterar Venc.
                                         </button>
                                     </div>
@@ -74,11 +74,11 @@
                         
                         <td>
                             {% if not aluno.assinatura_ativa %}
-                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#criarAssinaturaModal" data-url="{% url 'criar_assinatura' aluno.pk %}" data-aluno="{{ aluno.nome_completo }}">
+                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#criarAssinaturaModal" data-url="{% url 'criar_assinatura' slug=request.academia.slug aluno_pk=aluno.pk %}" data-aluno="{{ aluno.nome_completo }}">
                                     Criar Assinatura
                                 </button>
                             {% else %}
-                                <form action="{% url 'cancelar_assinatura' aluno.assinatura_ativa.pk %}" method="post" onsubmit="return confirm('Tem certeza que deseja cancelar esta assinatura? As faturas existentes não serão removidas.');">
+                                <form action="{% url 'cancelar_assinatura' slug=request.academia.slug assinatura_pk=aluno.assinatura_ativa.pk %}" method="post" onsubmit="return confirm('Tem certeza que deseja cancelar esta assinatura? As faturas existentes não serão removidas.');">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-sm btn-outline-danger">
                                         Cancelar Assinatura

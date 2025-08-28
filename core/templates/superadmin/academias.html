@@ -1,0 +1,317 @@
+{% extends 'superadmin/base.html' %}
+
+{% block title %}Gerenciar Academias - SuperAdmin ProLutas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">
+        <i class="fas fa-building me-2 text-primary"></i>
+        Gerenciar Academias
+    </h1>
+    <div>
+        <a href="/cadastro-academia/" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>
+            Nova Academia
+        </a>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card card-superadmin mb-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" placeholder="Buscar academia..." id="searchInput">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="statusFilter">
+                    <option value="">Todos os status</option>
+                    <option value="ativa">Ativas</option>
+                    <option value="inativa">Inativas</option>
+                    <option value="trial">Em Trial</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="planoFilter">
+                    <option value="">Todos os planos</option>
+                    <option value="basico">Básico</option>
+                    <option value="profissional">Profissional</option>
+                    <option value="enterprise">Enterprise</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+                    <i class="fas fa-times"></i> Limpar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Academias -->
+<div class="card card-superadmin">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">
+            <i class="fas fa-list me-2"></i>
+            Lista de Academias ({{ academias.count }})
+        </h6>
+    </div>
+    <div class="card-body p-0">
+        {% if academias %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Academia</th>
+                            <th>Responsável</th>
+                            <th>Plano</th>
+                            <th>Status</th>
+                            <th>Cadastro</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for academia in academias %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm me-3">
+                                        <div class="avatar-title bg-primary rounded-circle">
+                                            {{ academia.nome_fantasia|first|upper }}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">{{ academia.nome_fantasia }}</h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-link me-1"></i>
+                                            /{{ academia.slug }}/
+                                        </small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <strong>{{ academia.dono.get_full_name|default:academia.dono.username }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ academia.dono.email }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                {% if academia.assinatura_saas %}
+                                    <span class="badge bg-info">
+                                        {{ academia.assinatura_saas.plano.nome }}
+                                    </span>
+                                    <br>
+                                    <small class="text-muted">
+                                        R$ {{ academia.assinatura_saas.plano.preco_mensal }}/mês
+                                    </small>
+                                {% else %}
+                                    <span class="badge bg-secondary">Sem plano</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if academia.ativa %}
+                                    {% if academia.assinatura_saas.status == 'trial' %}
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-clock me-1"></i>
+                                            Trial
+                                        </span>
+                                        <br>
+                                        <small class="text-muted">
+                                            Até {{ academia.assinatura_saas.data_fim_trial|date:"d/m/Y" }}
+                                        </small>
+                                    {% elif academia.assinatura_saas.status == 'ativa' %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>
+                                            Ativa
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times me-1"></i>
+                                            {{ academia.assinatura_saas.get_status_display }}
+                                        </span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-secondary">
+                                        <i class="fas fa-pause me-1"></i>
+                                        Inativa
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div>
+                                    {{ academia.data_cadastro|date:"d/m/Y" }}
+                                    <br>
+                                    <small class="text-muted">{{ academia.data_cadastro|date:"H:i" }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="/{{ academia.slug }}/" 
+                                       class="btn btn-sm btn-outline-primary" 
+                                       title="Acessar Academia" 
+                                       target="_blank">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-info" 
+                                            title="Detalhes" 
+                                            onclick="viewDetails('{{ academia.id }}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning" 
+                                            title="Editar" 
+                                            onclick="editAcademia('{{ academia.id }}')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    {% if academia.ativa %}
+                                        <button class="btn btn-sm btn-outline-secondary" 
+                                                title="Desativar" 
+                                                onclick="toggleStatus('{{ academia.id }}', false)">
+                                            <i class="fas fa-pause"></i>
+                                        </button>
+                                    {% else %}
+                                        <button class="btn btn-sm btn-outline-success" 
+                                                title="Ativar" 
+                                                onclick="toggleStatus('{{ academia.id }}', true)">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-building fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Nenhuma academia cadastrada</h5>
+                <p class="text-muted">Comece criando a primeira academia do sistema.</p>
+                <a href="/cadastro-academia/" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>
+                    Cadastrar Primeira Academia
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Estatísticas Rápidas -->
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card card-superadmin border-left-primary">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ academias.count }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-building fa-2x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-superadmin border-left-success">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Ativas
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            {{ academias|length|add:"-1" }}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-check fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-superadmin border-left-warning">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Em Trial
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-clock fa-2x text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-superadmin border-left-danger">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                            Inativas
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-times fa-2x text-danger"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('planoFilter').value = '';
+}
+
+function viewDetails(academiaId) {
+    // Implementar modal de detalhes
+    alert('Detalhes da academia ID: ' + academiaId);
+}
+
+function editAcademia(academiaId) {
+    // Implementar edição
+    alert('Editar academia ID: ' + academiaId);
+}
+
+function toggleStatus(academiaId, status) {
+    const action = status ? 'ativar' : 'desativar';
+    if (confirm(`Tem certeza que deseja ${action} esta academia?`)) {
+        // Implementar toggle de status
+        alert(`${action} academia ID: ${academiaId}`);
+    }
+}
+
+// Filtros em tempo real
+document.getElementById('searchInput').addEventListener('input', function() {
+    // Implementar busca em tempo real
+});
+
+document.getElementById('statusFilter').addEventListener('change', function() {
+    // Implementar filtro por status
+});
+
+document.getElementById('planoFilter').addEventListener('change', function() {
+    // Implementar filtro por plano
+});
+</script>
+{% endblock %}
