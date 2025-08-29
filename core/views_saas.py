@@ -67,6 +67,13 @@ def cadastro_academia(request, plano_slug=None):
     plano = None
     if plano_slug:
         plano = get_object_or_404(PlanoSaaS, slug=plano_slug, ativo=True)
+    elif request.GET.get('plano'):
+        # Verifica se o plano foi passado via parâmetro GET da página de planos
+        plano_slug_get = request.GET.get('plano')
+        try:
+            plano = PlanoSaaS.objects.get(slug=plano_slug_get, ativo=True)
+        except PlanoSaaS.DoesNotExist:
+            pass
     
     if request.method == 'POST':
         form = CadastroAcademiaForm(request.POST)
@@ -89,9 +96,9 @@ def cadastro_academia(request, plano_slug=None):
             
             # Criar academia
             academia = Academia.objects.create(
-                nome=form.cleaned_data['nome'],
+                nome_fantasia=form.cleaned_data['nome'],
+                razao_social=form.cleaned_data['nome'],  # Usar o mesmo nome para razão social
                 slug=form.cleaned_data['slug'],
-                email=form.cleaned_data['email'],
                 telefone=form.cleaned_data['telefone'],
                 endereco=form.cleaned_data['endereco'],
                 dono=user,
@@ -109,14 +116,15 @@ def cadastro_academia(request, plano_slug=None):
                 data_inicio=data_inicio,
                 data_fim_trial=data_fim_trial,
                 data_vencimento=data_fim_trial,
-                ciclo_pagamento='mensal'
+                ciclo_pagamento='mensal',
+                valor_atual=plano.preco_mensal
             )
             
             # Registrar histórico
             HistoricoAssinaturaSaaS.objects.create(
                 assinatura=assinatura,
                 tipo_evento='criacao',
-                detalhes=f'Academia criada com plano {plano.nome} em período trial'
+                descricao=f'Academia criada com plano {plano.nome} em período trial'
             )
             
             # Fazer login automático
@@ -179,13 +187,13 @@ def pagamento(request):
             # Criar customer no Stripe se não existir
             if not assinatura.stripe_customer_id:
                 customer = stripe.Customer.create(
-                    email=academia.dono.email,
-                    name=academia.nome,
-                    metadata={
-                        'academia_id': academia.id,
-                        'academia_slug': academia.slug
-                    }
-                )
+                email=academia.dono.email,
+                name=academia.nome_fantasia,
+                metadata={
+                    'academia_id': academia.id,
+                    'academia_slug': academia.slug
+                }
+            )
                 assinatura.stripe_customer_id = customer.id
                 assinatura.save()
             

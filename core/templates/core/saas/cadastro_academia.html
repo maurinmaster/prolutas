@@ -116,6 +116,7 @@
                         </div>
                         
                         {% if plano_selecionado %}
+                        <input type="hidden" name="plano_id" value="{{ plano_selecionado.id }}">
                         <div class="alert alert-info mt-4">
                             <h6 class="alert-heading">Resumo do Plano</h6>
                             <div class="row">
