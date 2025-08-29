@@ -163,7 +163,7 @@
             </h2>
             <h5 class="exam-subtitle">{{ exame.modalidade.nome }}</h5>
         </div>
-        <a href="{% url 'gerenciar_exames' %}" class="btn btn-secondary">
+        <a href="{% url 'gerenciar_exames' academia.slug %}" class="btn btn-secondary">
             <i class="bi bi-arrow-left me-1"></i> Voltar
         </a>
     </div>
@@ -222,7 +222,7 @@
                     
                     {% if inscricao.status == 'convidado' or inscricao.status == 'confirmado' %}
                     <div class="btn-group btn-group-sm">
-                        <form method="post" action="{% url 'registrar_resultado_exame' inscricao.pk %}" class="d-inline">
+                        <form method="post" action="{% url 'registrar_resultado_exame' academia.slug inscricao.pk %}" class="d-inline">
                             {% csrf_token %}
                             <input type="hidden" name="status" value="aprovado">
                             <button type="submit" class="btn btn-approve action-btn">
@@ -230,7 +230,7 @@
                                 Aprovar
                             </button>
                         </form>
-                        <button type="button" class="btn btn-reject action-btn" data-bs-toggle="modal" data-bs-target="#reprovarModal" data-url="{% url 'registrar_resultado_exame' inscricao.pk %}" data-aluno-nome="{{ inscricao.aluno.nome_completo }}">
+                        <button type="button" class="btn btn-reject action-btn" data-bs-toggle="modal" data-bs-target="#reprovarModal" data-url="{% url 'registrar_resultado_exame' academia.slug inscricao.pk %}" data-aluno-nome="{{ inscricao.aluno.nome_completo }}">
                             <i class="bi bi-x-lg me-1"></i>
                             Reprovar
                         </button>
@@ -254,7 +254,7 @@
                 Convidar Alunos Aptos
             </div>
             <div class="card-body">
-                <form method="post" action="{% url 'convidar_alunos_exame' exame.pk %}">
+                <form method="post" action="{% url 'convidar_alunos_exame' academia.slug exame.pk %}">
                     {% csrf_token %}
                     {% if alunos_aptos_para_convidar %}
                         <p class="text-muted small">Selecione os alunos que deseja convidar para este exame.</p>

@@ -318,13 +318,14 @@
       </div>
       
       <div class="class-card-actions">
-        <a href="{% url 'turma_edit' turma.pk %}" class="action-btn-card primary">
+        <a href="{% url 'turma_edit' academia.slug turma.pk %}" class="action-btn-card primary">
           <i class="bi bi-gear-fill me-1"></i>
           Gerenciar
         </a>
         <button type="button" class="action-btn-card danger"
                   data-bs-toggle="modal" data-bs-target="#deleteTurmaModal"
-                data-turma-pk="{{ turma.pk }}">
+                data-turma-pk="{{ turma.pk }}"
+                data-url="{% url 'turma_delete' academia.slug turma.pk %}">
           <i class="bi bi-trash me-1"></i>
           Excluir
         </button>
@@ -607,17 +608,11 @@ $(document).ready(function() {
   if (deleteModal) {
     deleteModal.addEventListener('show.bs.modal', function (event) {
       const alunoPK = event.relatedTarget.getAttribute('data-aluno-pk');
-      deleteModal.querySelector('#deleteForm').setAttribute('action', `/aluno/${alunoPK}/excluir/`);
+      deleteModal.querySelector('#deleteForm').setAttribute('action', `/{{ academia.slug }}/aluno/${alunoPK}/excluir/`);
     });
   }
 
-  const deleteTurmaModal = document.getElementById('deleteTurmaModal');
-  if (deleteTurmaModal) {
-    deleteTurmaModal.addEventListener('show.bs.modal', function (event) {
-      const turmaPK = event.relatedTarget.getAttribute('data-turma-pk');
-      deleteTurmaModal.querySelector('#deleteTurmaForm').setAttribute('action', `/turma/${turmaPK}/excluir/`);
-    });
-  }
+  // Turma deletion is handled by static JavaScript with data-url attribute
 });
 </script>
 {% endblock %}

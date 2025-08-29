@@ -97,7 +97,7 @@ def aluno_add(request, slug=None):
 
 
 @login_required
-def aluno_edit(request, pk):
+def aluno_edit(request, pk, slug=None):
     # O filtro por academia é automático através do TenantManager
     aluno = get_object_or_404(Aluno, pk=pk)
     if request.method == 'POST':
@@ -110,7 +110,7 @@ def aluno_edit(request, pk):
     return render(request, 'core/aluno_form.html', {'form': form, 'tipo': 'Editar'})
 
 @login_required
-def aluno_delete(request, pk):
+def aluno_delete(request, pk, slug=None):
     aluno = get_object_or_404(Aluno, pk=pk, academia=request.academia)
     if request.method == 'POST':
         aluno.delete()
@@ -142,7 +142,7 @@ def turma_add(request, slug=None):
     return render(request, 'core/turma_form.html', contexto)
 
 @login_required
-def turma_edit(request, pk):
+def turma_edit(request, pk, slug=None):
     turma = get_object_or_404(Turma, pk=pk, academia=request.academia)
     HorarioFormSet = inlineformset_factory(Turma, Horario, form=HorarioForm, extra=1, can_delete=True)
     if request.method == 'POST':
@@ -159,7 +159,7 @@ def turma_edit(request, pk):
     return render(request, 'core/turma_form.html', contexto)
 
 @login_required
-def turma_delete(request, pk):
+def turma_delete(request, pk, slug=None):
     turma = get_object_or_404(Turma, pk=pk, academia=request.academia)
     if request.method == 'POST':
         turma.delete()
@@ -1043,15 +1043,16 @@ def detalhe_exame(request, pk, slug=None):
     # --- FIM DA LÓGICA CORRIGIDA ---
     
     contexto = {
-    'exame': exame,
-    'inscricoes': inscricoes,
-    'alunos_aptos_para_convidar': alunos_aptos_para_convidar,
-    'reprovacao_form': ReprovacaoForm(), # Adicione esta linha
-}
+        'academia': academia,
+        'exame': exame,
+        'inscricoes': inscricoes,
+        'alunos_aptos_para_convidar': alunos_aptos_para_convidar,
+        'reprovacao_form': ReprovacaoForm(), # Adicione esta linha
+    }
     return render(request, 'core/detalhe_exame.html', contexto)
 
 @login_required
-def registrar_resultado_exame(request, inscricao_pk):
+def registrar_resultado_exame(request, inscricao_pk, slug=None):
     academia = request.academia
     inscricao = get_object_or_404(InscricaoExame, pk=inscricao_pk, exame__academia=academia)
 
@@ -1087,10 +1088,10 @@ def registrar_resultado_exame(request, inscricao_pk):
                                 f"Converse com seu professor. Estamos aqui para te ajudar a evoluir! Oss!")
                     enviar_mensagem_whatsapp(academia, aluno, mensagem, tipo='reprovacao_exame')
 
-    return redirect('detalhe_exame', pk=inscricao.exame.pk)
+    return redirect('detalhe_exame', slug=academia.slug, pk=inscricao.exame.pk)
 
 @login_required
-def convidar_alunos_exame(request, exame_pk):
+def convidar_alunos_exame(request, exame_pk, slug=None):
     academia = request.academia
     exame = get_object_or_404(ExameGraduacao, pk=exame_pk, academia=academia)
 
@@ -1100,7 +1101,7 @@ def convidar_alunos_exame(request, exame_pk):
 
         if not graduacao_id:
             messages.error(request, "Você precisa selecionar a graduação do exame.")
-            return redirect('detalhe_exame', pk=exame.pk)
+            return redirect('detalhe_exame', slug=academia.slug, pk=exame.pk)
 
         graduacao = get_object_or_404(Graduacao, pk=graduacao_id)
         alunos_convidados = []
@@ -1133,7 +1134,7 @@ def convidar_alunos_exame(request, exame_pk):
                     enviar_mensagem_whatsapp(academia, aluno, mensagem, tipo='convite_exame')
         # --- FIM DA LÓGICA DE NOTIFICAÇÃO ---
 
-    return redirect('detalhe_exame', pk=exame.pk)
+    return redirect('detalhe_exame', slug=academia.slug, pk=exame.pk)
 
 @login_required
 def atualizar_status_inscricao(request, inscricao_pk, novo_status):
@@ -1168,7 +1169,7 @@ def atualizar_status_inscricao(request, inscricao_pk, novo_status):
         else:
             messages.info(request, f"Status de {aluno.nome_completo} atualizado para '{novo_status}'.")
 
-    return redirect('detalhe_exame', pk=inscricao.exame.pk)
+    return redirect('detalhe_exame', slug=academia.slug, pk=inscricao.exame.pk)
 
 @login_required
 def deletar_exame(request, pk, slug=None):
