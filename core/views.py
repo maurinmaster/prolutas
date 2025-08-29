@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db import transaction, models
+from django.db.models.deletion import ProtectedError
 from django.forms import inlineformset_factory
 from datetime import date, timedelta, datetime
 import os
@@ -377,17 +378,25 @@ def gerenciar_cadastros(request, slug=None):
     return render(request, 'core/gerenciar_cadastros.html', contexto)
 
 @login_required
-def deletar_modalidade(request, pk):
+def deletar_modalidade(request, pk, slug=None):
     item = get_object_or_404(Modalidade, pk=pk, academia=request.academia)
     if request.method == 'POST':
-        item.delete()
+        try:
+            item.delete()
+            messages.success(request, 'Modalidade deletada com sucesso!')
+        except ProtectedError:
+            messages.error(request, 'Não é possível deletar esta modalidade pois existem graduações, históricos ou exames vinculados a ela.')
     return redirect('gerenciar_cadastros', slug=request.academia.slug)
 
 @login_required
-def deletar_professor(request, pk):
+def deletar_professor(request, pk, slug=None):
     item = get_object_or_404(Professor, pk=pk, academia=request.academia)
     if request.method == 'POST':
-        item.delete()
+        try:
+            item.delete()
+            messages.success(request, 'Professor deletado com sucesso!')
+        except ProtectedError:
+            messages.error(request, 'Não é possível deletar este professor pois existem turmas ou outros registros vinculados a ele.')
     return redirect('gerenciar_cadastros', slug=request.academia.slug)
 
 @login_required
@@ -399,7 +408,7 @@ def gerenciar_planos(request, slug=None):
             plano = form.save(commit=False)
             plano.academia = academia
             plano.save()
-            return redirect('gerenciar_planos')
+            return redirect('gerenciar_planos', slug=request.academia.slug)
     else:
         form = PlanoForm()
     planos = Plano.objects.filter(academia=academia)
@@ -407,10 +416,14 @@ def gerenciar_planos(request, slug=None):
     return render(request, 'core/gerenciar_planos.html', contexto)
 
 @login_required
-def deletar_plano(request, pk):
+def deletar_plano(request, pk, slug=None):
     plano = get_object_or_404(Plano, pk=pk, academia=request.academia)
     if request.method == 'POST':
-        plano.delete()
+        try:
+            plano.delete()
+            messages.success(request, 'Plano deletado com sucesso!')
+        except ProtectedError:
+            messages.error(request, 'Não é possível deletar este plano pois existem assinaturas vinculadas a ele.')
     return redirect('gerenciar_planos', slug=request.academia.slug)
 
 @login_required
